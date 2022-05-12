@@ -1,6 +1,6 @@
 # Information
 This is an asynchronous client and server project using boost's TCP library, asio.
-Also written in C++20 due to the ease of development when building an asynchronous application using new co routines.
+Also written in C++20 due to the ease of development when building an asynchronous application using the new co routines.
 
 # Setup
 #### CryptoPP library compilation
