@@ -2,6 +2,6 @@
 
 int main()
 {
-
+	
 	return std::getchar();
 }
