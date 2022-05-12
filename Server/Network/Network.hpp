@@ -3,13 +3,15 @@
 
 namespace Network
 {
+	inline std::vector<asio::ip::address> ConnectionList;
+
 	class Socket
 	{
 	private:
 		tcp::socket& _Socket;
 	public:
 		Socket(tcp::socket& Socket) : _Socket(Socket) { }
-		~Socket() { _Socket.shutdown(asio::socket_base::shutdown_both); _Socket.close(); }
+		~Socket() { this->_Socket.shutdown(asio::socket_base::shutdown_both); }
 
 		tcp::socket& Get();
 		asio::ip::address GetIpAddress();

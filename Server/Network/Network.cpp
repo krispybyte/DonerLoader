@@ -14,20 +14,31 @@ asio::awaitable<void> Network::SocketHandler(tcp::socket TcpSocket)
 {
 	Network::Socket Socket(TcpSocket);
 
-	std::printf("[+] %s has connected.", Socket.GetIpAddress().to_string().c_str());
+	const auto IpAddress = Socket.GetIpAddress();
+
+	if (std::find(ConnectionList.begin(), ConnectionList.end(), IpAddress) != ConnectionList.end())
+	{
+		std::cout << "[-] " << IpAddress.to_string().c_str() << " is already connected!" << std::endl;
+		Socket.~Socket();
+		co_return;
+	}
+
+	ConnectionList.push_back(IpAddress);
+
+	std::cout << "[+] " << IpAddress.to_string().c_str() << " has connected." << std::endl;
 
 	while (true)
 	{
 		if (!Socket.Get().is_open())
 		{
-			std::printf("[-] %s has disconnected.", Socket.GetIpAddress().to_string().c_str());
+			std::cout << "[-] " << IpAddress.to_string().c_str() << " has disconnected." << std::endl;
 			break;
 		}
 
 		try
 		{
 			{
-				const std::size_t ByteCount = co_await Socket.Get().async_read_some(Data::ReadBuffer, asio::use_awaitable);
+				const auto ByteCount = co_await Socket.Get().async_read_some(Data::ReadBuffer, asio::use_awaitable);
 				std::cout << "[Read " << ByteCount << " bytes] " << reinterpret_cast<const char*>(Data::ReadBuffer.data()) << std::endl;
 			}
 
@@ -38,17 +49,18 @@ asio::awaitable<void> Network::SocketHandler(tcp::socket TcpSocket)
 		}
 		catch (std::exception& Ex)
 		{
-			std::printf("[!] Exception: %s\n", Ex.what());
+			std::cerr << "[" << IpAddress.to_string().c_str() << "] Exception: " << Ex.what() << std::endl;
 			break;
 		}
 	}
 
+	ConnectionList.erase(std::remove(ConnectionList.begin(), ConnectionList.end(), Socket.GetIpAddress()), ConnectionList.end());
 	Socket.~Socket();
 }
 
 asio::awaitable<void> Network::ConnectionHandler(tcp::acceptor& TcpAcceptor)
 {
-	std::printf("[!] Spawning launch coroutine.\n");
+	std::cout << "[!] Spawning launch coroutine." << std::endl;
 
 	while (true)
 	{

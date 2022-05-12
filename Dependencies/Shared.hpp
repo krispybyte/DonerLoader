@@ -1,4 +1,8 @@
 #pragma once
+#pragma warning(disable : 4309)
+#pragma warning(disable : 4369)
+#pragma warning(disable : 4091)
+
 #include <iostream>
 
 // Asio

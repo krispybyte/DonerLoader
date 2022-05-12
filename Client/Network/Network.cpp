@@ -2,13 +2,13 @@
 
 asio::awaitable<void> Network::SocketHandler(tcp::socket Socket)
 {
-	std::printf("[+] Connected.");
+	std::cout << "[+] Connected." << std::endl;
 
 	while (true)
 	{
 		if (!Socket.is_open())
 		{
-			std::printf("[-] Disconnected.");
+			std::cout << "[-] Disconnected." << std::endl;
 			break;
 		}
 
@@ -26,7 +26,9 @@ asio::awaitable<void> Network::SocketHandler(tcp::socket Socket)
 		}
 		catch (std::exception& Ex)
 		{
-			std::printf("[!] Exception: %s\n", Ex.what());
+			std::cout << "[!] Exception: " << Ex.what() << std::endl;
+			MessageBoxA(nullptr, "The server closed the connection.", "Error (94)", MB_ICONERROR | MB_OK);
+			ExitProcess(94);
 			break;
 		}
 	}
@@ -37,7 +39,7 @@ asio::awaitable<void> Network::SocketHandler(tcp::socket Socket)
 
 asio::awaitable<void> Network::Connect()
 {
-	std::printf("[!] Spawning launch coroutine\n");
+	std::cout << "[!] Spawning launch coroutine." << std::endl;
 
 	const auto Executor = asio::get_associated_executor(asio::use_awaitable);
 	auto Socket = tcp::socket(Executor);
