@@ -1,17 +1,5 @@
 #include "AES256.hpp"
 
-void Crypto::Aes256Gcm::Generate()
-{
-    SecByteBlock Key(AES::MAX_KEYLENGTH);
-    Rng.GenerateBlock(Key, Key.size());
-
-    SecByteBlock Iv(AES::BLOCKSIZE);
-    Rng.GenerateBlock(Iv, Iv.size());
-
-    this->KeyStr = std::string(reinterpret_cast<const char*>(Key.data()), Key.size());
-    this->IvStr = std::string(reinterpret_cast<const char*>(Iv.data()), Iv.size());
-}
-
 std::string Crypto::Aes256Gcm::Encrypt(const std::string Plain)
 {
     const SecByteBlock Key(reinterpret_cast<const unsigned char*>(this->KeyStr.data()), this->KeyStr.size());

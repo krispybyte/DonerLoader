@@ -29,6 +29,7 @@ asio::awaitable<void> Network::SocketHandler(tcp::socket TcpSocket)
 	std::cout << "[+] " << IpAddress.to_string().c_str() << " has connected." << std::endl;
 
 	Socket.Rsa.Generate();
+	Socket.Aes.Generate();
 
 	while (true)
 	{
@@ -37,8 +38,6 @@ asio::awaitable<void> Network::SocketHandler(tcp::socket TcpSocket)
 			std::cout << "[-] " << IpAddress.to_string().c_str() << " has disconnected." << std::endl;
 			break;
 		}
-
-		Socket.Aes.Generate();
 
 		try
 		{

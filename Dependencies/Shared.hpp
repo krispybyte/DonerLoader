@@ -31,16 +31,11 @@ namespace Network
 #define NETWORK_PORT_INT			42069
 #define NETWORK_IP_AND_PORT_STR		"127.0.0.1", "42069"
 
-	typedef enum SocketIds : int
+	enum class SocketIds : int
 	{
-		Idle = 0,
-		KeyExchange = 9021,
-		Module = 4892,
-	};
-
-	typedef enum ClientStates : int
-	{
-		None = 0,
-		ExchangingKeys = 1,
+		Initialize = 2485,
+		Login = 8922,
+		Hwid = 9014,
+		Module = 1482
 	};
 }

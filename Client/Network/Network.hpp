@@ -7,8 +7,6 @@
 
 namespace Network
 {
-	inline Network::ClientStates CurrentState = ClientStates::ExchangingKeys;
-
 	namespace Data
 	{
 		inline std::array<char, NETWORK_CHUNK_SIZE> ReadBufferData;

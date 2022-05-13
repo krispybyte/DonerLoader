@@ -4,7 +4,7 @@ asio::awaitable<void> Network::SocketHandler(tcp::socket Socket)
 {
 	std::cout << "[+] Connected." << std::endl;
 
-	Crypto::Rsa Rsa(4096);
+	Crypto::Rsa Rsa;
 	Crypto::Aes256Gcm Aes;
 
 	while (true)
@@ -15,12 +15,17 @@ asio::awaitable<void> Network::SocketHandler(tcp::socket Socket)
 			break;
 		}
 
-		Aes.Generate();
-
 		try
 		{
-			const std::string WriteData = "Hey from client";
-			co_await Socket.async_write_some(asio::const_buffer(WriteData.data() + '\0', WriteData.size()), asio::use_awaitable);
+			const json JsonWrite =
+			{
+				{ "Id", Network::SocketIds::Initialize },
+				{ "Data", "ClientPublicKey" }
+			};
+
+			const auto JsonWriteDump = JsonWrite.dump();
+
+			co_await Socket.async_write_some(asio::const_buffer(JsonWriteDump.data() + '\0', JsonWriteDump.size()), asio::use_awaitable);
 
 			co_await Socket.async_read_some(Data::ReadBuffer, asio::use_awaitable);
 		}
@@ -32,9 +37,6 @@ asio::awaitable<void> Network::SocketHandler(tcp::socket Socket)
 			break;
 		}
 	}
-
-	Socket.shutdown(asio::socket_base::shutdown_both);
-	Socket.close();
 }
 
 asio::awaitable<void> Network::Connect()

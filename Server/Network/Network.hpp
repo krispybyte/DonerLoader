@@ -13,15 +13,13 @@ namespace Network
 		tcp::socket& _Socket;
 	public:
 		Socket(tcp::socket& Socket) : _Socket(Socket) { }
-		~Socket() { this->_Socket.shutdown(asio::socket_base::shutdown_both); }
+		~Socket() { this->_Socket.close(); }
 
 		tcp::socket& Get();
 		asio::ip::address GetIpAddress();
 
 		Crypto::Aes256Gcm Aes;
 		Crypto::Rsa Rsa;
-
-		//RSA::PublicKey ClientPublicKey;
 	};
 
 	namespace Data
