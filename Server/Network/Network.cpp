@@ -1,4 +1,6 @@
 #include "Network.hpp"
+#include "../Cryptography/Base64.hpp"
+#include "../Cryptography/PEM.hpp"
 
 tcp::socket& Network::Socket::Get()
 {
@@ -27,6 +29,8 @@ asio::awaitable<void> Network::SocketHandler(tcp::socket TcpSocket)
 
 	std::cout << "[+] " << IpAddress.to_string().c_str() << " has connected." << std::endl;
 
+	Socket.Rsa.Generate();
+
 	while (true)
 	{
 		if (!Socket.Get().is_open())
@@ -34,6 +38,8 @@ asio::awaitable<void> Network::SocketHandler(tcp::socket TcpSocket)
 			std::cout << "[-] " << IpAddress.to_string().c_str() << " has disconnected." << std::endl;
 			break;
 		}
+
+		Socket.Aes.Generate();
 
 		try
 		{
@@ -43,8 +49,15 @@ asio::awaitable<void> Network::SocketHandler(tcp::socket TcpSocket)
 			}
 
 			{
-				const std::string WriteMessage = "Hello client!";
-				co_await Socket.Get().async_write_some(asio::const_buffer(WriteMessage.data() + '\0', WriteMessage.size()), asio::use_awaitable);
+				json Json;
+
+				{
+					Json["Stub"] = 1337;
+				}
+
+				const std::string RawJson = Json.dump();
+
+				co_await Socket.Get().async_write_some(asio::const_buffer(RawJson.data() + '\0', RawJson.size()), asio::use_awaitable);
 			}
 		}
 		catch (std::exception& Ex)

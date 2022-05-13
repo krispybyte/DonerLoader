@@ -157,12 +157,22 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Cryptography\AES256.cpp" />
+    <ClCompile Include="Cryptography\Base64.cpp" />
+    <ClCompile Include="Cryptography\PEM.cpp" />
+    <ClCompile Include="Cryptography\RSA.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Network\Network.cpp" />
+    <ClCompile Include="Utilities\Utilities.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Common.hpp" />
+    <ClInclude Include="Cryptography\AES256.hpp" />
+    <ClInclude Include="Cryptography\Base64.hpp" />
+    <ClInclude Include="Cryptography\PEM.hpp" />
+    <ClInclude Include="Cryptography\RSA.hpp" />
     <ClInclude Include="Network\Network.hpp" />
+    <ClInclude Include="Utilities\Utilities.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

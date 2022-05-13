@@ -1,5 +1,7 @@
 ﻿#pragma once
 #include <Shared.hpp>
+#include "../Cryptography/AES256.hpp"
+#include "../Cryptography/RSA.hpp"
 
 namespace Network
 {
@@ -15,6 +17,11 @@ namespace Network
 
 		tcp::socket& Get();
 		asio::ip::address GetIpAddress();
+
+		Crypto::Aes256Gcm Aes;
+		Crypto::Rsa Rsa;
+
+		RSA::PublicKey ClientPublicKey;
 	};
 
 	namespace Data

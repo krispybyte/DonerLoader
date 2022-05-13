@@ -17,7 +17,12 @@ using namespace nlohmann;
 
 // CryptoPP
 #include <cryptopp/aes.h>
+#include <cryptopp/gcm.h>
+#include <cryptopp/rsa.h>
+#include <cryptopp/pem.h>
 #include <cryptopp/base64.h>
+#include <cryptopp/modes.h>
+#include <cryptopp/osrng.h>
 using namespace CryptoPP;
 
 namespace Network
@@ -26,8 +31,9 @@ namespace Network
 #define NETWORK_PORT_INT			42069
 #define NETWORK_IP_AND_PORT_STR		"127.0.0.1", "42069"
 
-	typedef enum SocketIds : std::uint8_t
+	typedef enum SocketIds
 	{
+		KeyExchange = 9021,
 		Module = 4892,
 	};
 }

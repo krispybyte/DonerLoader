@@ -8,3 +8,7 @@
 
 // Network
 #include "Network/Network.hpp"
+
+// Cryptography
+#include "Cryptography/Base64.hpp"
+#include "Cryptography/PEM.hpp"

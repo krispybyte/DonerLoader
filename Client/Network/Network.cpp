@@ -1,8 +1,15 @@
 #include "Network.hpp"
+#include "../Cryptography/AES256.hpp"
+#include "../Cryptography/RSA.hpp"
+#include "../Cryptography/PEM.hpp"
+#include "../Cryptography/Base64.hpp"
 
 asio::awaitable<void> Network::SocketHandler(tcp::socket Socket)
 {
 	std::cout << "[+] Connected." << std::endl;
+
+	Crypto::Rsa Rsa(4096);
+	Crypto::Aes256Gcm Aes;
 
 	while (true)
 	{
@@ -12,11 +19,21 @@ asio::awaitable<void> Network::SocketHandler(tcp::socket Socket)
 			break;
 		}
 
+		Aes.Generate();
+
 		try
 		{
 			{
-				const std::string WriteMessage = "Hello server!";
-				co_await Socket.async_write_some(asio::const_buffer(WriteMessage.data() + '\0', WriteMessage.size()), asio::use_awaitable);
+				json Json;
+
+				{
+					Json["Id"] = Network::SocketIds::KeyExchange;
+					Json["Data"] = "Hello";
+				}
+
+				const std::string RawJson = Json.dump();
+
+				co_await Socket.async_write_some(asio::const_buffer(RawJson.data() + '\0', RawJson.size()), asio::use_awaitable);
 			}
 
 			{
