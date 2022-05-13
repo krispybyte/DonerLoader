@@ -21,7 +21,6 @@ asio::awaitable<void> Network::SocketHandler(tcp::socket TcpSocket)
 	if (std::find(ConnectionList.begin(), ConnectionList.end(), IpAddress) != ConnectionList.end())
 	{
 		std::cout << "[-] " << IpAddress.to_string().c_str() << " is already connected!" << std::endl;
-		Socket.~Socket();
 		co_return;
 	}
 
@@ -43,22 +42,10 @@ asio::awaitable<void> Network::SocketHandler(tcp::socket TcpSocket)
 
 		try
 		{
-			{
-				const auto ByteCount = co_await Socket.Get().async_read_some(Data::ReadBuffer, asio::use_awaitable);
-				std::cout << "[Read " << ByteCount << " bytes] " << reinterpret_cast<const char*>(Data::ReadBuffer.data()) << std::endl;
-			}
+			co_await Socket.Get().async_read_some(Data::ReadBuffer, asio::use_awaitable);
 
-			{
-				json Json;
-
-				{
-					Json["Stub"] = 1337;
-				}
-
-				const std::string RawJson = Json.dump();
-
-				co_await Socket.Get().async_write_some(asio::const_buffer(RawJson.data() + '\0', RawJson.size()), asio::use_awaitable);
-			}
+			const std::string WriteData = "Hey from server";
+			co_await Socket.Get().async_write_some(asio::const_buffer(WriteData.data() + '\0', WriteData.size()), asio::use_awaitable);
 		}
 		catch (std::exception& Ex)
 		{
@@ -67,8 +54,8 @@ asio::awaitable<void> Network::SocketHandler(tcp::socket TcpSocket)
 		}
 	}
 
+	// Client will close socket at this point
 	ConnectionList.erase(std::remove(ConnectionList.begin(), ConnectionList.end(), Socket.GetIpAddress()), ConnectionList.end());
-	Socket.~Socket();
 }
 
 asio::awaitable<void> Network::ConnectionHandler(tcp::acceptor& TcpAcceptor)

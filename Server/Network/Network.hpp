@@ -21,7 +21,7 @@ namespace Network
 		Crypto::Aes256Gcm Aes;
 		Crypto::Rsa Rsa;
 
-		RSA::PublicKey ClientPublicKey;
+		//RSA::PublicKey ClientPublicKey;
 	};
 
 	namespace Data

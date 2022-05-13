@@ -1,8 +1,4 @@
 #include "Network.hpp"
-#include "../Cryptography/AES256.hpp"
-#include "../Cryptography/RSA.hpp"
-#include "../Cryptography/PEM.hpp"
-#include "../Cryptography/Base64.hpp"
 
 asio::awaitable<void> Network::SocketHandler(tcp::socket Socket)
 {
@@ -23,23 +19,10 @@ asio::awaitable<void> Network::SocketHandler(tcp::socket Socket)
 
 		try
 		{
-			{
-				json Json;
+			const std::string WriteData = "Hey from client";
+			co_await Socket.async_write_some(asio::const_buffer(WriteData.data() + '\0', WriteData.size()), asio::use_awaitable);
 
-				{
-					Json["Id"] = Network::SocketIds::KeyExchange;
-					Json["Data"] = "Hello";
-				}
-
-				const std::string RawJson = Json.dump();
-
-				co_await Socket.async_write_some(asio::const_buffer(RawJson.data() + '\0', RawJson.size()), asio::use_awaitable);
-			}
-
-			{
-				const std::size_t ByteCount = co_await Socket.async_read_some(Data::ReadBuffer, asio::use_awaitable);
-				std::cout << "[Read " << ByteCount << " bytes] " << reinterpret_cast<const char*>(Data::ReadBuffer.data()) << std::endl;
-			}
+			co_await Socket.async_read_some(Data::ReadBuffer, asio::use_awaitable);
 		}
 		catch (std::exception& Ex)
 		{
