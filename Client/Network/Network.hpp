@@ -7,11 +7,15 @@
 
 namespace Network
 {
-	namespace Data
+	enum class ClientStates : int
 	{
-		inline std::array<char, NETWORK_CHUNK_SIZE> ReadBufferData;
-		inline asio::mutable_buffer ReadBuffer(ReadBufferData.data(), ReadBufferData.size());
-	}
+		InitializeState = 0,
+		LoginState = 1,
+		HwidState = 2,
+		ModuleState = 3,
+	};
+
+	inline Network::ClientStates ClientState = Network::ClientStates::InitializeState;
 
 	asio::awaitable<void> SocketHandler(tcp::socket Socket);
 	asio::awaitable<void> Connect();

@@ -22,12 +22,6 @@ namespace Network
 		Crypto::Rsa Rsa;
 	};
 
-	namespace Data
-	{
-		inline std::array<char, NETWORK_CHUNK_SIZE> ReadBufferData;
-		inline asio::mutable_buffer ReadBuffer(ReadBufferData.data(), ReadBufferData.size());
-	}
-
 	asio::awaitable<void> SocketHandler(tcp::socket TcpSocket);
 	asio::awaitable<void> ConnectionHandler(tcp::acceptor& TcpAcceptor);
 	void Create(asio::ip::port_type Port);

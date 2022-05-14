@@ -33,3 +33,13 @@ RSA::PrivateKey Crypto::Rsa::GetPrivateKey()
 {
 	return this->PrivateKey;
 }
+
+void Crypto::Rsa::SetPublicKey(RSA::PublicKey& NewPublicKey)
+{
+	this->PublicKey = NewPublicKey;
+}
+
+void Crypto::Rsa::SetPrivateKey(RSA::PrivateKey& NewPrivateKey)
+{
+	this->PrivateKey = NewPrivateKey;
+}

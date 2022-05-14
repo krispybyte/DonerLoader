@@ -31,6 +31,9 @@ asio::awaitable<void> Network::SocketHandler(tcp::socket TcpSocket)
 	Socket.Rsa.Generate();
 	Socket.Aes.Generate();
 
+	std::array<char, NETWORK_CHUNK_SIZE> ReadBufferData;
+	asio::mutable_buffer ReadBuffer(ReadBufferData.data(), ReadBufferData.size());
+
 	while (true)
 	{
 		if (!Socket.Get().is_open())
@@ -41,10 +44,60 @@ asio::awaitable<void> Network::SocketHandler(tcp::socket TcpSocket)
 
 		try
 		{
-			co_await Socket.Get().async_read_some(Data::ReadBuffer, asio::use_awaitable);
+			// Clear read data buffer
+			memset(&ReadBufferData, NULL, NETWORK_CHUNK_SIZE);
+			
+			const auto ByteCount = co_await Socket.Get().async_read_some(ReadBuffer, asio::use_awaitable);
+			const auto JsonRead = json::parse(reinterpret_cast<const char*>(ReadBuffer.data()));
+			const auto SocketId = static_cast<Network::SocketIds>(JsonRead["Id"]);
 
-			const std::string WriteData = "Hey from server";
-			co_await Socket.Get().async_write_some(asio::const_buffer(WriteData.data() + '\0', WriteData.size()), asio::use_awaitable);
+			json JsonWrite;
+
+			switch (SocketId)
+			{
+				case SocketIds::Initialize:
+				{
+					const auto ClientPublicKeyStr = Crypto::Base64::Decode(JsonRead["Data"]);
+					auto ClientPublicKey = Crypto::PEM::ImportKey(ClientPublicKeyStr);
+					Socket.Rsa.SetPublicKey(ClientPublicKey);
+
+					JsonWrite =
+					{
+						{ "Id", SocketIds::Initialize },
+						{ "Data", Crypto::Base64::Encode(Crypto::PEM::ExportKey(Socket.Rsa.GetPublicKey())) }
+					};
+
+					std::cout << "[+] Got the client's public key!" << std::endl;
+
+					break;
+				}
+				case SocketIds::Login:
+				{
+					JsonWrite =
+					{
+						{ "Id", SocketIds::Login },
+						{ "Data", Crypto::Base64::Encode("I logged u in bruh :skull:") }
+					};
+
+					std::cout << "[+] Logging " << IpAddress.to_string().c_str() << " in." << std::endl;
+
+					break;
+				}
+				case SocketIds::Hwid:
+				case SocketIds::Module:
+				{
+					std::cout << "[!] Unimplemented." << std::endl;
+					break;
+				}
+				default:
+				{
+					std::cout << "[!] Invalid socket id." << std::endl;
+					break;
+				}
+			}
+
+			const auto JsonWriteDump = JsonWrite.dump();
+			co_await Socket.Get().async_write_some(asio::const_buffer(JsonWriteDump.data() + '\0', JsonWriteDump.size()), asio::use_awaitable);
 		}
 		catch (std::exception& Ex)
 		{

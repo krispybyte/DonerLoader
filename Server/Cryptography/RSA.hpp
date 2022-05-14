@@ -15,5 +15,7 @@ namespace Crypto
 		std::string Decrypt(std::string Cipher, RSA::PrivateKey& PrivateKey);
 		RSA::PublicKey GetPublicKey();
 		RSA::PrivateKey GetPrivateKey();
+		void SetPublicKey(RSA::PublicKey& NewPublicKey);
+		void SetPrivateKey(RSA::PrivateKey& NewPrivateKey);
 	};
 }

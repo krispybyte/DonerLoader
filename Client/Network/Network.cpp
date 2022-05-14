@@ -7,6 +7,9 @@ asio::awaitable<void> Network::SocketHandler(tcp::socket Socket)
 	Crypto::Rsa Rsa;
 	Crypto::Aes256Gcm Aes;
 
+	std::array<char, NETWORK_CHUNK_SIZE> ReadBufferData;
+	asio::mutable_buffer ReadBuffer(ReadBufferData.data(), ReadBufferData.size());
+
 	while (true)
 	{
 		if (!Socket.is_open())
@@ -17,18 +20,85 @@ asio::awaitable<void> Network::SocketHandler(tcp::socket Socket)
 
 		try
 		{
-			const json JsonWrite =
+			json JsonWrite;
+
+			switch (ClientState)
 			{
-				{ "Id", Network::SocketIds::Initialize },
-				{ "Data", "ClientPublicKey" }
-			};
+				case ClientStates::InitializeState:
+				{
+					JsonWrite =
+					{
+						{ "Id", SocketIds::Initialize },
+						{ "Data", Crypto::Base64::Encode(Crypto::PEM::ExportKey(Rsa.GetPublicKey())) }
+					};
 
-			const auto JsonWriteDump = JsonWrite.dump();
+					break;
+				}
+				case ClientStates::LoginState:
+				{
+					JsonWrite =
+					{
+						{ "Id", SocketIds::Login },
+						{ "Data", Crypto::Base64::Encode("Log me in bruh :fire:") }
+					};
 
+					break;
+				}
+				case ClientStates::HwidState:
+				case ClientStates::ModuleState:
+				{
+					std::cout << "[!] Unimplemented." << std::endl;
+					break;
+				}
+				default:
+				{
+					std::cout << "[!] Invalid client state." << std::endl;
+					break;
+				}
+			}
+
+			auto JsonWriteDump = JsonWrite.dump();
 			co_await Socket.async_write_some(asio::const_buffer(JsonWriteDump.data() + '\0', JsonWriteDump.size()), asio::use_awaitable);
 
-			co_await Socket.async_read_some(Data::ReadBuffer, asio::use_awaitable);
+			// Clear read data buffer
+			memset(&ReadBufferData, NULL, NETWORK_CHUNK_SIZE);
+
+			const auto ByteCount = co_await Socket.async_read_some(ReadBuffer, asio::use_awaitable);
+			const auto JsonRead = json::parse(reinterpret_cast<const char*>(ReadBuffer.data()));
+			const auto SocketId = static_cast<Network::SocketIds>(JsonRead["Id"]);
+
+			switch (SocketId)
+			{
+				case SocketIds::Initialize:
+				{
+					const auto ServerPublicKeyStr = Crypto::Base64::Decode(JsonRead["Data"]);
+					auto ServerPublicKey = Crypto::PEM::ImportKey(ServerPublicKeyStr);
+
+					std::cout << "[+] Got the server's public key!" << std::endl;
+
+					Rsa.SetPublicKey(ServerPublicKey);
+					ClientState = ClientStates::LoginState;
+					break;
+				}
+				case SocketIds::Login:
+				{
+					std::cout << "[+] Server logged me in." << std::endl;
+					break;
+				}
+				case SocketIds::Hwid:
+				case SocketIds::Module:
+				{
+					std::cout << "[!] Unimplemented." << std::endl;
+					break;
+				}
+				default:
+				{
+					std::cout << "[!] Invalid socket id." << std::endl;
+					break;
+				}
+			}
 		}
+
 		catch (std::exception& Ex)
 		{
 			std::cout << "[!] Exception: " << Ex.what() << std::endl;
