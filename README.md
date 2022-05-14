@@ -3,7 +3,6 @@ This is an asynchronous client and server project using boost's TCP library, asi
 Also written in C++20 due to the ease of development when building an asynchronous application using the new co routines.
 
 # Task-list
-```
 - [x] Public key exchange.
 - [ ] Module streaming.
 - [ ] Heartbeat.
@@ -12,7 +11,6 @@ Also written in C++20 due to the ease of development when building an asynchrono
 - [ ] Module relocations and imports handled over the server.
 - [ ] Small gui?
 - [ ] SHA256 for json key values.
-```
 
 # Setup
 #### CryptoPP library compilation
