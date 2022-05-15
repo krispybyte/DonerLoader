@@ -4,7 +4,9 @@ asio::awaitable<void> Network::SocketHandler(tcp::socket Socket)
 {
 	std::cout << "[+] Connected." << std::endl;
 
-	Crypto::Rsa Rsa;
+	auto ClientPrivate = Crypto::Rsa::GeneratePrivate();
+	RSA::PublicKey ServerPublic;
+
 	Crypto::Aes256Gcm Aes;
 
 	std::array<char, NETWORK_CHUNK_SIZE> ReadBufferData;
@@ -24,12 +26,23 @@ asio::awaitable<void> Network::SocketHandler(tcp::socket Socket)
 
 			switch (ClientState)
 			{
-				case ClientStates::InitializeState:
+				case ClientStates::IdleState:
 				{
 					JsonWrite =
 					{
+						{ "Id", SocketIds::Idle },
+					};
+
+					break;
+				}
+				case ClientStates::InitializeState:
+				{
+					const auto ClientPublic = Crypto::Rsa::GeneratePublic(ClientPrivate);
+
+					JsonWrite =
+					{
 						{ "Id", SocketIds::Initialize },
-						{ "Data", Crypto::Base64::Encode(Crypto::PEM::ExportKey(Rsa.GetPublicKey())) }
+						{ "Data", Crypto::Base64::Encode(Crypto::PEM::ExportKey(ClientPublic)) }
 					};
 
 					break;
@@ -66,19 +79,25 @@ asio::awaitable<void> Network::SocketHandler(tcp::socket Socket)
 
 			switch (SocketId)
 			{
+				case SocketIds::Idle:
+				{
+					// Await things such as a login event,
+					// injection event etc to change this state
+					break;
+				}
 				case SocketIds::Initialize:
 				{
-					auto ServerPublicKey = Crypto::PEM::ImportKey(Crypto::Base64::Decode(JsonRead["Data"]));
-
+					ServerPublic = Crypto::PEM::ImportKey(Crypto::Base64::Decode(JsonRead["Data"]));
 					std::cout << "[+] Got the server's public key!" << std::endl;
 
-					Rsa.SetPublicKey(ServerPublicKey);
 					ClientState = ClientStates::LoginState;
 					break;
 				}
 				case SocketIds::Login:
 				{
 					std::cout << "[+] Server logged me in." << std::endl;
+
+					ClientState = ClientStates::IdleState;
 					break;
 				}
 				case SocketIds::Hwid:

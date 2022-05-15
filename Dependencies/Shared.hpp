@@ -33,6 +33,7 @@ namespace Network
 
 	enum class SocketIds : int
 	{
+		Idle = 1104,
 		Initialize = 2485,
 		Login = 8922,
 		Hwid = 9014,

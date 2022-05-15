@@ -12,8 +12,8 @@ namespace Crypto
         const int TagSize = 12;
     public:
         void Generate();
-        std::string Encrypt(const std::string Plain);
-        std::string Decrypt(const std::string Cipher);
+        std::string Encrypt(const std::string& Plain, const std::string& KeyStr, const std::string& IvStr);
+        std::string Decrypt(const std::string& Cipher, const std::string& KeyStr, const std::string& IvStr);
         std::string GetKey();
         std::string GetIv();
     };

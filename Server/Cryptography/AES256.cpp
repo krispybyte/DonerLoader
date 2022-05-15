@@ -12,10 +12,10 @@ void Crypto::Aes256Gcm::Generate()
     this->IvStr = std::string(reinterpret_cast<const char*>(Iv.data()), Iv.size());
 }
 
-std::string Crypto::Aes256Gcm::Encrypt(const std::string Plain)
+std::string Crypto::Aes256Gcm::Encrypt(const std::string& Plain, const std::string& KeyStr, const std::string& IvStr)
 {
-    const SecByteBlock Key(reinterpret_cast<const unsigned char*>(this->KeyStr.data()), this->KeyStr.size());
-    const SecByteBlock Iv(reinterpret_cast<const unsigned char*>(this->KeyStr.data()), this->KeyStr.size());
+    const SecByteBlock Key(reinterpret_cast<const unsigned char*>(KeyStr.data()), KeyStr.size());
+    const SecByteBlock Iv(reinterpret_cast<const unsigned char*>(IvStr.data()), IvStr.size());
 
     GCM<AES>::Encryption Encryptor;
     Encryptor.SetKeyWithIV(Key, Key.size(), Iv, sizeof(Iv));
@@ -25,10 +25,10 @@ std::string Crypto::Aes256Gcm::Encrypt(const std::string Plain)
     return Cipher;
 }
 
-std::string Crypto::Aes256Gcm::Decrypt(const std::string Cipher)
+std::string Crypto::Aes256Gcm::Decrypt(const std::string& Cipher, const std::string& KeyStr, const std::string& IvStr)
 {
-    const SecByteBlock Key(reinterpret_cast<const unsigned char*>(this->KeyStr.data()), this->KeyStr.size());
-    const SecByteBlock Iv(reinterpret_cast<const unsigned char*>(this->KeyStr.data()), this->KeyStr.size());
+    const SecByteBlock Key(reinterpret_cast<const unsigned char*>(KeyStr.data()), KeyStr.size());
+    const SecByteBlock Iv(reinterpret_cast<const unsigned char*>(IvStr.data()), IvStr.size());
 
     GCM<AES>::Decryption Decryptor;
     Decryptor.SetKeyWithIV(Key, Key.size(), Iv, sizeof(Iv));

@@ -9,6 +9,7 @@ Also written in C++20 due to the ease of development when building an asynchrono
 - [ ] Database implementation using mongodb.
 - [ ] Module injection.
 - [ ] Module relocations and imports handled over the server.
+- [ ] Client state verification handled over the server.
 - [ ] Small gui?
 - [ ] SHA256 for json key values.
 

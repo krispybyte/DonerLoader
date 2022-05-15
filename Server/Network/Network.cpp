@@ -28,8 +28,9 @@ asio::awaitable<void> Network::SocketHandler(tcp::socket TcpSocket)
 
 	std::cout << "[+] " << IpAddress.to_string().c_str() << " has connected." << std::endl;
 
-	Socket.Rsa.Generate();
-	Socket.Aes.Generate();
+	Socket.ServerPrivate = Crypto::Rsa::GeneratePrivate();
+
+	//Socket.Aes.Generate();
 
 	std::array<char, NETWORK_CHUNK_SIZE> ReadBufferData;
 	asio::mutable_buffer ReadBuffer(ReadBufferData.data(), ReadBufferData.size());
@@ -52,18 +53,27 @@ asio::awaitable<void> Network::SocketHandler(tcp::socket TcpSocket)
 
 			switch (SocketId)
 			{
+				case SocketIds::Idle:
+				{
+					JsonWrite =
+					{
+						{ "Id", SocketIds::Idle }
+					};
+
+					break;
+				}
 				case SocketIds::Initialize:
 				{
-					auto ClientPublicKey = Crypto::PEM::ImportKey(Crypto::Base64::Decode(JsonRead["Data"]));
-					Socket.Rsa.SetPublicKey(ClientPublicKey);
+					Socket.ClientPublic = Crypto::PEM::ImportKey(Crypto::Base64::Decode(JsonRead["Data"]));
+					std::cout << "[+] Got the client's public key!" << std::endl;
+
+					const auto ServerPublic = Crypto::Rsa::GeneratePublic(Socket.ServerPrivate);
 
 					JsonWrite =
 					{
 						{ "Id", SocketIds::Initialize },
-						{ "Data", Crypto::Base64::Encode(Crypto::PEM::ExportKey(Socket.Rsa.GetPublicKey())) }
+						{ "Data", Crypto::Base64::Encode(Crypto::PEM::ExportKey(ServerPublic)) }
 					};
-
-					std::cout << "[+] Got the client's public key!" << std::endl;
 
 					break;
 				}

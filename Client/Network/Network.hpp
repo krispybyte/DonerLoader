@@ -9,10 +9,11 @@ namespace Network
 {
 	enum class ClientStates : int
 	{
-		InitializeState = 0,
-		LoginState = 1,
-		HwidState = 2,
-		ModuleState = 3,
+		IdleState = 0,
+		InitializeState,
+		LoginState,
+		HwidState,
+		ModuleState,
 	};
 
 	inline Network::ClientStates ClientState = Network::ClientStates::InitializeState;
