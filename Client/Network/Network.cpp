@@ -57,11 +57,8 @@ asio::awaitable<void> Network::SocketHandler(tcp::socket Socket)
 				}
 			}
 
-			auto JsonWriteDump = JsonWrite.dump();
-			co_await Socket.async_write_some(asio::const_buffer(JsonWriteDump.data() + '\0', JsonWriteDump.size()), asio::use_awaitable);
-
-			// Clear read data buffer
-			memset(&ReadBufferData, NULL, NETWORK_CHUNK_SIZE);
+			const auto WriteData = JsonWrite.dump() + '\0';
+			co_await Socket.async_write_some(asio::buffer(WriteData, WriteData.size()), asio::use_awaitable);
 
 			const auto ByteCount = co_await Socket.async_read_some(ReadBuffer, asio::use_awaitable);
 			const auto JsonRead = json::parse(reinterpret_cast<const char*>(ReadBuffer.data()));
@@ -71,8 +68,7 @@ asio::awaitable<void> Network::SocketHandler(tcp::socket Socket)
 			{
 				case SocketIds::Initialize:
 				{
-					const auto ServerPublicKeyStr = Crypto::Base64::Decode(JsonRead["Data"]);
-					auto ServerPublicKey = Crypto::PEM::ImportKey(ServerPublicKeyStr);
+					auto ServerPublicKey = Crypto::PEM::ImportKey(Crypto::Base64::Decode(JsonRead["Data"]));
 
 					std::cout << "[+] Got the server's public key!" << std::endl;
 

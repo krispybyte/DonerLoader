@@ -44,9 +44,6 @@ asio::awaitable<void> Network::SocketHandler(tcp::socket TcpSocket)
 
 		try
 		{
-			// Clear read data buffer
-			memset(&ReadBufferData, NULL, NETWORK_CHUNK_SIZE);
-			
 			const auto ByteCount = co_await Socket.Get().async_read_some(ReadBuffer, asio::use_awaitable);
 			const auto JsonRead = json::parse(reinterpret_cast<const char*>(ReadBuffer.data()));
 			const auto SocketId = static_cast<Network::SocketIds>(JsonRead["Id"]);
@@ -57,8 +54,7 @@ asio::awaitable<void> Network::SocketHandler(tcp::socket TcpSocket)
 			{
 				case SocketIds::Initialize:
 				{
-					const auto ClientPublicKeyStr = Crypto::Base64::Decode(JsonRead["Data"]);
-					auto ClientPublicKey = Crypto::PEM::ImportKey(ClientPublicKeyStr);
+					auto ClientPublicKey = Crypto::PEM::ImportKey(Crypto::Base64::Decode(JsonRead["Data"]));
 					Socket.Rsa.SetPublicKey(ClientPublicKey);
 
 					JsonWrite =
@@ -96,8 +92,8 @@ asio::awaitable<void> Network::SocketHandler(tcp::socket TcpSocket)
 				}
 			}
 
-			const auto JsonWriteDump = JsonWrite.dump();
-			co_await Socket.Get().async_write_some(asio::const_buffer(JsonWriteDump.data() + '\0', JsonWriteDump.size()), asio::use_awaitable);
+			const auto WriteData = JsonWrite.dump() + '\0';
+			co_await Socket.Get().async_write_some(asio::buffer(WriteData, WriteData.size()), asio::use_awaitable);
 		}
 		catch (std::exception& Ex)
 		{
