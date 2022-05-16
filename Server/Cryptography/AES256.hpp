@@ -3,18 +3,13 @@
 
 namespace Crypto
 {
-    class Aes256Gcm
+    namespace Aes256
     {
-    private:
-        AutoSeededRandomPool Rng;
-        std::string KeyStr;
-        std::string IvStr;
-        const int TagSize = 12;
-    public:
-        void Generate();
-        std::string Encrypt(const std::string& Plain, const std::string& KeyStr, const std::string& IvStr);
-        std::string Decrypt(const std::string& Cipher, const std::string& KeyStr, const std::string& IvStr);
-        std::string GetKey();
-        std::string GetIv();
-    };
+        inline AutoSeededRandomPool Rng;
+        constexpr auto TagSize = 12;
+        SecByteBlock GenerateKey(std::size_t Size = AES::MAX_KEYLENGTH);
+        SecByteBlock GenerateIv(std::size_t Size = AES::BLOCKSIZE);
+        std::string Encrypt(const std::string& Plain, const SecByteBlock& Key, const SecByteBlock& Iv);
+        std::string Decrypt(const std::string& Cipher, const SecByteBlock& Key, const SecByteBlock& Iv);
+    }
 }

@@ -1,37 +1,35 @@
 #include "AES256.hpp"
 
-std::string Crypto::Aes256Gcm::Encrypt(const std::string Plain)
+SecByteBlock Crypto::Aes256::GenerateKey(std::size_t Size)
 {
-    const SecByteBlock Key(reinterpret_cast<const unsigned char*>(this->KeyStr.data()), this->KeyStr.size());
-    const SecByteBlock Iv(reinterpret_cast<const unsigned char*>(this->KeyStr.data()), this->KeyStr.size());
+    SecByteBlock Key(Size);
+    Rng.GenerateBlock(Key, Key.size());
+    return Key;
+}
 
+SecByteBlock Crypto::Aes256::GenerateIv(std::size_t Size)
+{
+    SecByteBlock Iv(Size);
+    Rng.GenerateBlock(Iv, Iv.size());
+    return Iv;
+}
+
+std::string Crypto::Aes256::Encrypt(const std::string& Plain, const SecByteBlock& Key, const SecByteBlock& Iv)
+{
     GCM<AES>::Encryption Encryptor;
     Encryptor.SetKeyWithIV(Key, Key.size(), Iv, sizeof(Iv));
 
     std::string Cipher;
-    const StringSource StringSource(Plain, true, new AuthenticatedEncryptionFilter(Encryptor, new StringSink(Cipher), false, this->TagSize));
+    const StringSource StringSource(Plain, true, new AuthenticatedEncryptionFilter(Encryptor, new StringSink(Cipher), false, Aes256::TagSize));
     return Cipher;
 }
 
-std::string Crypto::Aes256Gcm::Decrypt(const std::string Cipher)
+std::string Crypto::Aes256::Decrypt(const std::string& Cipher, const SecByteBlock& Key, const SecByteBlock& Iv)
 {
-    const SecByteBlock Key(reinterpret_cast<const unsigned char*>(this->KeyStr.data()), this->KeyStr.size());
-    const SecByteBlock Iv(reinterpret_cast<const unsigned char*>(this->KeyStr.data()), this->KeyStr.size());
-
     GCM<AES>::Decryption Decryptor;
     Decryptor.SetKeyWithIV(Key, Key.size(), Iv, sizeof(Iv));
 
     std::string Plain;
-    const StringSource StringSource(Cipher, true, new AuthenticatedDecryptionFilter(Decryptor, new StringSink(Plain), false, this->TagSize));
+    const StringSource StringSource(Cipher, true, new AuthenticatedDecryptionFilter(Decryptor, new StringSink(Plain), false, Aes256::TagSize));
     return Plain;
-}
-
-std::string Crypto::Aes256Gcm::GetKey()
-{
-    return this->KeyStr;
-}
-
-std::string Crypto::Aes256Gcm::GetIv()
-{
-    return this->IvStr;
 }

@@ -28,9 +28,13 @@ asio::awaitable<void> Network::SocketHandler(tcp::socket TcpSocket)
 
 	std::cout << "[+] " << IpAddress.to_string().c_str() << " has connected." << std::endl;
 
+	// Rsa setup
 	Socket.ServerPrivate = Crypto::Rsa::GeneratePrivate();
+	bool ExchangedPublicKeys = false;
 
-	//Socket.Aes.Generate();
+	// Aes setup
+	auto ServerAesKey = Crypto::Aes256::GenerateKey();
+	auto ServerAesIv = Crypto::Aes256::GenerateKey();
 
 	std::array<char, NETWORK_CHUNK_SIZE> ReadBufferData;
 	asio::mutable_buffer ReadBuffer(ReadBufferData.data(), ReadBufferData.size());
@@ -64,15 +68,51 @@ asio::awaitable<void> Network::SocketHandler(tcp::socket TcpSocket)
 				}
 				case SocketIds::Initialize:
 				{
-					Socket.ClientPublic = Crypto::PEM::ImportKey(Crypto::Base64::Decode(JsonRead["Data"]));
-					std::cout << "[+] Got the client's public key!" << std::endl;
+					// Receive the client's public
+					if (!ExchangedPublicKeys)
+					{
+						Socket.ClientPublic = Crypto::PEM::ImportKey(Crypto::Base64::Decode(JsonRead["PublicKey"]));
+						std::cout << "[+] Got the client's public key!" << std::endl;
 
-					const auto ServerPublic = Crypto::Rsa::GeneratePublic(Socket.ServerPrivate);
+						const auto ServerPublic = Crypto::Rsa::GeneratePublic(Socket.ServerPrivate);
+
+						JsonWrite =
+						{
+							{ "Id", SocketIds::Initialize },
+							{ "PublicKey", Crypto::Base64::Encode(Crypto::PEM::ExportKey(ServerPublic)) }
+						};
+
+						ExchangedPublicKeys = true;
+
+						// Break to not continue onto the
+						// aes key and iv exchange stage
+						break;
+					}
+
+					// Receive the client's aes key and iv
+
+					// Decode
+					auto DecodedClientAesKey = Crypto::Base64::Decode(JsonRead["AesKey"]);
+					auto DecodedClientAesIv = Crypto::Base64::Decode(JsonRead["AesIv"]);
+
+					// Decrypt
+					const auto DecryptedClientAesKey = Crypto::Rsa::Decrypt(DecodedClientAesKey, Socket.ServerPrivate);
+					const auto DecryptedClientAesIv = Crypto::Rsa::Decrypt(DecodedClientAesIv, Socket.ServerPrivate);
+
+					Socket.ClientAesKey = SecByteBlock((const byte*)DecryptedClientAesKey.data(), DecryptedClientAesKey.size());
+					Socket.ClientAesIv = SecByteBlock((const byte*)DecryptedClientAesIv.data(), DecryptedClientAesIv.size());
+
+					auto ServerAesKeyStr = std::string(reinterpret_cast<const char*>(ServerAesKey.data()), ServerAesKey.size());
+					auto ServerAesIvStr = std::string(reinterpret_cast<const char*>(ServerAesIv.data()), ServerAesIv.size());
+
+					printf("[+] Client AES key: %s", Crypto::Base64::Encode(DecryptedClientAesKey).c_str());
+					printf("[+] Server AES key: %s\n", Crypto::Base64::Encode(ServerAesKeyStr).c_str());
 
 					JsonWrite =
 					{
 						{ "Id", SocketIds::Initialize },
-						{ "Data", Crypto::Base64::Encode(Crypto::PEM::ExportKey(ServerPublic)) }
+						{ "AesKey", Crypto::Base64::Encode(Crypto::Rsa::Encrypt(ServerAesKeyStr, Socket.ClientPublic)) },
+						{ "AesIv", Crypto::Base64::Encode(Crypto::Rsa::Encrypt(ServerAesIvStr, Socket.ClientPublic)) }
 					};
 
 					break;

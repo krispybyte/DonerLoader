@@ -18,9 +18,11 @@ namespace Network
 		tcp::socket& Get();
 		asio::ip::address GetIpAddress();
 
-		Crypto::Aes256Gcm Aes;
 		RSA::PrivateKey ServerPrivate;
 		RSA::PublicKey ClientPublic;
+
+		SecByteBlock ClientAesKey;
+		SecByteBlock ClientAesIv;
 	};
 
 	asio::awaitable<void> SocketHandler(tcp::socket TcpSocket);

@@ -11,6 +11,7 @@ Also written in C++20 due to the ease of development when building an asynchrono
 - [ ] Module relocations and imports handled over the server.
 - [ ] Client state verification handled over the server.
 - [ ] Small gui?
+- [ ] Client pre-loader in the future.
 - [ ] SHA256 for json key values.
 
 # Setup
