@@ -1,6 +1,5 @@
 #include "Network.hpp"
-#include "../Cryptography/Base64.hpp"
-#include "../Cryptography/PEM.hpp"
+#include "SocketHandler.hpp"
 
 tcp::socket& Network::Socket::Get()
 {
@@ -16,7 +15,7 @@ asio::awaitable<void> Network::SocketHandler(tcp::socket TcpSocket)
 {
 	Network::Socket Socket(TcpSocket);
 
-	const auto IpAddress = Socket.GetIpAddress();
+	const asio::ip::address IpAddress = Socket.GetIpAddress();
 
 	if (std::find(ConnectionList.begin(), ConnectionList.end(), IpAddress) != ConnectionList.end())
 	{
@@ -28,16 +27,12 @@ asio::awaitable<void> Network::SocketHandler(tcp::socket TcpSocket)
 
 	std::cout << "[+] " << IpAddress.to_string().c_str() << " has connected." << std::endl;
 
-	// Rsa setup
-	Socket.ServerPrivate = Crypto::Rsa::GeneratePrivate();
-	bool ExchangedPublicKeys = false;
-
-	// Aes setup
-	auto ServerAesKey = Crypto::Aes256::GenerateKey();
-	auto ServerAesIv = Crypto::Aes256::GenerateKey();
-
 	std::array<char, NETWORK_CHUNK_SIZE> ReadBufferData;
 	asio::mutable_buffer ReadBuffer(ReadBufferData.data(), ReadBufferData.size());
+
+	// Cryptography
+	Socket.ServerPrivateKey = Crypto::Rsa::GeneratePrivate();
+	Socket.AesKey = Crypto::Aes256::GenerateKey();
 
 	while (true)
 	{
@@ -49,86 +44,24 @@ asio::awaitable<void> Network::SocketHandler(tcp::socket TcpSocket)
 
 		try
 		{
-			const auto ByteCount = co_await Socket.Get().async_read_some(ReadBuffer, asio::use_awaitable);
-			const auto JsonRead = json::parse(reinterpret_cast<const char*>(ReadBuffer.data()));
-			const auto SocketId = static_cast<Network::SocketIds>(JsonRead["Id"]);
+			co_await Socket.Get().async_read_some(ReadBuffer, asio::use_awaitable);
 
-			json JsonWrite;
+			json ReadJson = json::parse(reinterpret_cast<const char*>(ReadBuffer.data()));
 
+			const SocketIds SocketId = static_cast<SocketIds>(ReadJson["Id"]);
 			switch (SocketId)
 			{
 				case SocketIds::Idle:
 				{
-					JsonWrite =
-					{
-						{ "Id", SocketIds::Idle }
-					};
-
+					co_await Handle::Idle(Socket);
 					break;
 				}
 				case SocketIds::Initialize:
 				{
-					// Receive the client's public
-					if (!ExchangedPublicKeys)
-					{
-						Socket.ClientPublic = Crypto::PEM::ImportKey(Crypto::Base64::Decode(JsonRead["PublicKey"]));
-						std::cout << "[+] Got the client's public key!" << std::endl;
-
-						const auto ServerPublic = Crypto::Rsa::GeneratePublic(Socket.ServerPrivate);
-
-						JsonWrite =
-						{
-							{ "Id", SocketIds::Initialize },
-							{ "PublicKey", Crypto::Base64::Encode(Crypto::PEM::ExportKey(ServerPublic)) }
-						};
-
-						ExchangedPublicKeys = true;
-
-						// Break to not continue onto the
-						// aes key and iv exchange stage
-						break;
-					}
-
-					// Receive the client's aes key and iv
-
-					// Decode
-					auto DecodedClientAesKey = Crypto::Base64::Decode(JsonRead["AesKey"]);
-					auto DecodedClientAesIv = Crypto::Base64::Decode(JsonRead["AesIv"]);
-
-					// Decrypt
-					const auto DecryptedClientAesKey = Crypto::Rsa::Decrypt(DecodedClientAesKey, Socket.ServerPrivate);
-					const auto DecryptedClientAesIv = Crypto::Rsa::Decrypt(DecodedClientAesIv, Socket.ServerPrivate);
-
-					Socket.ClientAesKey = SecByteBlock((const byte*)DecryptedClientAesKey.data(), DecryptedClientAesKey.size());
-					Socket.ClientAesIv = SecByteBlock((const byte*)DecryptedClientAesIv.data(), DecryptedClientAesIv.size());
-
-					auto ServerAesKeyStr = std::string(reinterpret_cast<const char*>(ServerAesKey.data()), ServerAesKey.size());
-					auto ServerAesIvStr = std::string(reinterpret_cast<const char*>(ServerAesIv.data()), ServerAesIv.size());
-
-					printf("[+] Client AES key: %s", Crypto::Base64::Encode(DecryptedClientAesKey).c_str());
-					printf("[+] Server AES key: %s\n", Crypto::Base64::Encode(ServerAesKeyStr).c_str());
-
-					JsonWrite =
-					{
-						{ "Id", SocketIds::Initialize },
-						{ "AesKey", Crypto::Base64::Encode(Crypto::Rsa::Encrypt(ServerAesKeyStr, Socket.ClientPublic)) },
-						{ "AesIv", Crypto::Base64::Encode(Crypto::Rsa::Encrypt(ServerAesIvStr, Socket.ClientPublic)) }
-					};
-
+					co_await Handle::Initialize(Socket, ReadJson);
 					break;
 				}
 				case SocketIds::Login:
-				{
-					JsonWrite =
-					{
-						{ "Id", SocketIds::Login },
-						{ "Data", Crypto::Base64::Encode("I logged u in bruh :skull:") }
-					};
-
-					std::cout << "[+] Logging " << IpAddress.to_string().c_str() << " in." << std::endl;
-
-					break;
-				}
 				case SocketIds::Hwid:
 				case SocketIds::Module:
 				{
@@ -138,12 +71,9 @@ asio::awaitable<void> Network::SocketHandler(tcp::socket TcpSocket)
 				default:
 				{
 					std::cout << "[!] Invalid socket id." << std::endl;
-					break;
+					goto Disconnect;
 				}
 			}
-
-			const auto WriteData = JsonWrite.dump() + '\0';
-			co_await Socket.Get().async_write_some(asio::buffer(WriteData, WriteData.size()), asio::use_awaitable);
 		}
 		catch (std::exception& Ex)
 		{
@@ -152,6 +82,7 @@ asio::awaitable<void> Network::SocketHandler(tcp::socket TcpSocket)
 		}
 	}
 
+Disconnect:
 	// Client will close socket at this point
 	ConnectionList.erase(std::remove(ConnectionList.begin(), ConnectionList.end(), Socket.GetIpAddress()), ConnectionList.end());
 }
@@ -164,7 +95,7 @@ asio::awaitable<void> Network::ConnectionHandler(tcp::acceptor& TcpAcceptor)
 	{
 		// Asynchronously wait for a socket and then accept
 		// it's connection using our tcp acceptor.
-		auto Socket = co_await TcpAcceptor.async_accept(asio::use_awaitable);
+		tcp::socket Socket = co_await TcpAcceptor.async_accept(asio::use_awaitable);
 		co_spawn(Socket.get_executor(), Network::SocketHandler(std::move(Socket)), asio::detached);
 	}
 }
@@ -174,7 +105,7 @@ void Network::Create(asio::ip::port_type Port)
 	// Create asio io context
 	asio::io_context IoCtx(1);
 
-	const auto Executor = IoCtx.get_executor();
+	const asio::io_context::executor_type Executor = IoCtx.get_executor();
 	tcp::acceptor Acceptor(Executor, { tcp::v4(), Port });
 
 	// Spawn launch coroutine

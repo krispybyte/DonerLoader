@@ -4,7 +4,7 @@ std::string Crypto::Base64::Encode(std::string Decoded)
 {
 	std::string Encoded;
 
-	Base64Encoder Encoder;
+	Base64Encoder Encoder(nullptr, false, 72);
 	Encoder.Put(reinterpret_cast<byte*>(Decoded.data()), Decoded.size());
 	Encoder.MessageEnd();
 

@@ -4,15 +4,8 @@ CryptoPP::RSA::PublicKey Crypto::PEM::ImportKey(const std::string PublicKeyStrin
 {
 	RSA::PublicKey PublicKey;
 
-	try
-	{
-		StringSource Source(PublicKeyString, true);
-		PEM_Load(Source, PublicKey);
-	}
-	catch (const Exception& Ex)
-	{
-		std::cerr << Ex.what() << std::endl;
-	}
+	StringSource StringSource(PublicKeyString, true);
+	PEM_Load(StringSource, PublicKey);
 
 	return PublicKey;
 }

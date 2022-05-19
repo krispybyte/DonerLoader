@@ -2,6 +2,8 @@
 #include <Shared.hpp>
 #include "../Cryptography/AES256.hpp"
 #include "../Cryptography/RSA.hpp"
+#include "../Cryptography/Base64.hpp"
+#include "../Cryptography/PEM.hpp"
 
 namespace Network
 {
@@ -18,11 +20,10 @@ namespace Network
 		tcp::socket& Get();
 		asio::ip::address GetIpAddress();
 
-		RSA::PrivateKey ServerPrivate;
-		RSA::PublicKey ClientPublic;
+		RSA::PrivateKey ServerPrivateKey;
+		RSA::PublicKey ClientPublicKey;
 
-		SecByteBlock ClientAesKey;
-		SecByteBlock ClientAesIv;
+		SecByteBlock AesKey;
 	};
 
 	asio::awaitable<void> SocketHandler(tcp::socket TcpSocket);

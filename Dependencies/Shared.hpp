@@ -39,4 +39,9 @@ namespace Network
 		Hwid = 9014,
 		Module = 1482
 	};
+
+	enum class ModuleIds : int
+	{
+		Test = 2610,
+	};
 }
