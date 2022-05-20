@@ -25,7 +25,7 @@ git clone --recursive https://github.com/stackey-net/Network.git
 
 #### CryptoPP library compilation
 1.  cd to the Dependencies/cryptopp directory.
-2.  git clone https://github.com/noloader/cryptopp-pem.
+2.  git clone https://github.com/noloader/cryptopp-pem.git.
 3.  Add pem.h, pem_common.cpp, pem_common.h, pem_read.cpp, pem_write.cpp, x509cert.cpp and x509cert.h from the crypto-pem directory to the cryptopp submodule.
 4.  Launch the project and include the files you've just added, compile in x64 architecture.
 
