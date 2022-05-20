@@ -45,3 +45,9 @@ git clone --recursive https://github.com/stackey-net/Network.git
 13.  Make sure the architecture is set to x64, now compile 'mongocxx_shared'.
 14.  Done, the library will be in the 'mongo-cxx-driver/build/src/mongocxx/Release' directory by default.
 15.  In your actual project, make sure to also include the bson library, and both of the dynamic libraries.
+
+# Dependencies
+- [Asio](https://github.com/chriskohlhoff/asio "Asio on github")
+- [Cryptopp](https://github.com/weidai11/cryptopp "Cryptopp on github")
+- [Json](https://github.com/nlohmann/json "Json on github")
+- [MongoDB CXX](https://github.com/mongodb/mongo-cxx-driver "MongoDB CXX on github")
