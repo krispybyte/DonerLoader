@@ -21,6 +21,7 @@ using namespace nlohmann;
 #include <cryptopp/rsa.h>
 #include <cryptopp/pem.h>
 #include <cryptopp/base64.h>
+#include <cryptopp/hex.h>
 #include <cryptopp/modes.h>
 #include <cryptopp/osrng.h>
 using namespace CryptoPP;

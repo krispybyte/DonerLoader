@@ -8,4 +8,5 @@ namespace Network::Handle
 
 	asio::awaitable<void> Idle(tcp::socket& Socket);
 	asio::awaitable<void> Initialization(tcp::socket& Socket, RSA::PrivateKey& PrivateKey);
+	asio::awaitable<void> Login(tcp::socket& Socket);
 }

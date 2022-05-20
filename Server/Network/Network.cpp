@@ -19,13 +19,13 @@ asio::awaitable<void> Network::SocketHandler(tcp::socket TcpSocket)
 
 	if (std::find(ConnectionList.begin(), ConnectionList.end(), IpAddress) != ConnectionList.end())
 	{
-		std::cout << "[-] " << IpAddress.to_string().c_str() << " is already connected!" << std::endl;
+		std::cout << "[-] " << IpAddress.to_string().c_str() << " is already connected!" << '\n';
 		co_return;
 	}
 
 	ConnectionList.push_back(IpAddress);
 
-	std::cout << "[+] " << IpAddress.to_string().c_str() << " has connected." << std::endl;
+	std::cout << "[+] " << IpAddress.to_string().c_str() << " has connected." << '\n';
 
 	std::array<char, NETWORK_CHUNK_SIZE> ReadBufferData;
 	asio::mutable_buffer ReadBuffer(ReadBufferData.data(), ReadBufferData.size());
@@ -38,7 +38,7 @@ asio::awaitable<void> Network::SocketHandler(tcp::socket TcpSocket)
 	{
 		if (!Socket.Get().is_open())
 		{
-			std::cout << "[-] " << IpAddress.to_string().c_str() << " has disconnected." << std::endl;
+			std::cout << "[-] " << IpAddress.to_string().c_str() << " has disconnected." << '\n';
 			break;
 		}
 
@@ -62,6 +62,10 @@ asio::awaitable<void> Network::SocketHandler(tcp::socket TcpSocket)
 					break;
 				}
 				case SocketIds::Login:
+				{
+					co_await Handle::Login(Socket, ReadJson);
+					break;
+				}
 				case SocketIds::Hwid:
 				case SocketIds::Module:
 				{
@@ -77,7 +81,7 @@ asio::awaitable<void> Network::SocketHandler(tcp::socket TcpSocket)
 		}
 		catch (std::exception& Ex)
 		{
-			std::cerr << "[" << IpAddress.to_string().c_str() << "] Exception: " << Ex.what() << std::endl;
+			std::cerr << "[" << IpAddress.to_string().c_str() << "] Exception: " << Ex.what() << '\n';
 			break;
 		}
 	}
@@ -89,7 +93,7 @@ Disconnect:
 
 asio::awaitable<void> Network::ConnectionHandler(tcp::acceptor& TcpAcceptor)
 {
-	std::cout << "[!] Spawning launch coroutine." << std::endl;
+	std::cout << "[!] Spawning launch coroutine." << '\n';
 
 	while (true)
 	{

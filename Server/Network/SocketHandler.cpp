@@ -1,4 +1,5 @@
 #include "SocketHandler.hpp"
+#include "../Utilities/Utilities.hpp"
 
 asio::awaitable<void> Network::Handle::Idle(Network::Socket& Socket)
 {
@@ -6,7 +7,7 @@ asio::awaitable<void> Network::Handle::Idle(Network::Socket& Socket)
 	{
 		const json Json =
 		{
-			{ "Response", 1337 }
+			{ "Response", NULL }
 		};
 
 		const std::string WriteData = Json.dump() + '\0';
@@ -16,29 +17,56 @@ asio::awaitable<void> Network::Handle::Idle(Network::Socket& Socket)
 
 asio::awaitable<void> Network::Handle::Initialize(Network::Socket& Socket, json& ReadJson)
 {
-	// Read client public key
+	// Read
 	{
-		// Get client public key
-		const std::string ClientPublicKeyStr = Crypto::Base64::Decode(ReadJson["ClientKey"]);
-		Socket.ClientPublicKey = Crypto::PEM::ImportKey(ClientPublicKeyStr);
+		// Get the client's public key
+		const std::string ClientPublicKey = Crypto::Base64::Decode(ReadJson["ClientKey"]);
+		Socket.ClientPublicKey = Crypto::PEM::ImportKey(ClientPublicKey);
 
-		std::cout << "[+] Got the client's public key!" << std::endl;
+		std::cout << "[+] Exchanged keys!" << '\n';
 	}
 
-	// Write server public key and aes key (encrypted with client's public key)
+	// Write
 	{
 		// Setup server public key
-		RSA::PublicKey ServerPublicKey = RSA::PublicKey(Socket.ServerPrivateKey);
-		const std::string ServerPublicKeyStr = Crypto::PEM::ExportKey(ServerPublicKey);
+		const std::string ServerPublicKey = Utilities::GetPublicKeyStr(Socket.ServerPrivateKey);
 
-		// Setup aes key
-		std::string AesKeyStr = std::string(reinterpret_cast<const char*>(Socket.AesKey.data()), Socket.AesKey.size());
-		const std::string EncryptedAesKeyStr = Crypto::Rsa::Encrypt(AesKeyStr, Socket.ClientPublicKey);
+		// Convert aes key to a string then encrypt it using the client's
+		// public rsa key which was read, and then encode it using base64
+		std::string AesKey = std::string(reinterpret_cast<const char*>(Socket.AesKey.data()), Socket.AesKey.size());
+		AesKey = Crypto::Base64::Encode(Crypto::Rsa::Encrypt(AesKey, Socket.ClientPublicKey));
 
 		const json Json =
 		{
-			{ "ServerKey", Crypto::Base64::Encode(ServerPublicKeyStr) },
-			{ "AesKey", Crypto::Base64::Encode(EncryptedAesKeyStr) }
+			{ "ServerKey", ServerPublicKey },
+			{ "AesKey", AesKey }
+		};
+
+		const std::string WriteData = Json.dump() + '\0';
+		co_await Socket.Get().async_write_some(asio::buffer(WriteData, WriteData.size()), asio::use_awaitable);
+	}
+}
+
+asio::awaitable<void> Network::Handle::Login(Network::Socket& Socket, json& ReadJson)
+{
+	// Read
+	{
+		const std::string DecryptedMessage = Utilities::DecryptMessage(ReadJson["Data"], ReadJson["AesIv"], Socket.AesKey);
+		std::cout << "[+] Decrypted login message: " << DecryptedMessage.c_str() << '\n';
+	}
+
+	// Write
+	{
+		const auto EncryptionData = Utilities::EncryptMessage("Hello client!", Socket.AesKey);
+
+		const std::string EncryptedMessage = std::get<0>(EncryptionData);
+		const std::string AesIvStr = std::get<1>(EncryptionData);
+
+		const json Json =
+		{
+			{ "Id", SocketIds::Login },
+			{ "AesIv", AesIvStr },
+			{ "Data", EncryptedMessage }
 		};
 
 		const std::string WriteData = Json.dump() + '\0';

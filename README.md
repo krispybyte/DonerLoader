@@ -6,6 +6,7 @@ Also written in C++20 due to the ease of development when building an asynchrono
 - [x] Public key exchange.
 - [x] Aes key and initialization vector exchange.
 - [ ] Module streaming.
+- [ ] Hardware ID check.
 - [ ] Heartbeat.
 - [ ] Database implementation using mongodb.
 - [ ] Module injection.

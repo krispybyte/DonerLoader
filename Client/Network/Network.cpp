@@ -3,7 +3,7 @@
 
 asio::awaitable<void> Network::SocketHandler(tcp::socket Socket)
 {
-	std::cout << "[+] Connected." << std::endl;
+	std::cout << "[+] Connected." << '\n';
 
 	// Cryptography
 	RSA::PrivateKey ClientPrivateKey = Crypto::Rsa::GeneratePrivate();
@@ -12,7 +12,7 @@ asio::awaitable<void> Network::SocketHandler(tcp::socket Socket)
 	{
 		if (!Socket.is_open())
 		{
-			std::cout << "[-] Disconnected." << std::endl;
+			std::cout << "[-] Disconnected." << '\n';
 			break;
 		}
 
@@ -28,6 +28,11 @@ asio::awaitable<void> Network::SocketHandler(tcp::socket Socket)
 				case ClientStates::InitializeState:
 				{
 					co_await Handle::Initialization(Socket, ClientPrivateKey);
+					break;
+				}
+				case ClientStates::LoginState:
+				{
+					co_await Handle::Login(Socket);
 					break;
 				}
 				default:
@@ -49,7 +54,7 @@ asio::awaitable<void> Network::SocketHandler(tcp::socket Socket)
 
 asio::awaitable<void> Network::Connect()
 {
-	std::cout << "[!] Spawning launch coroutine." << std::endl;
+	std::cout << "[!] Spawning launch coroutine." << '\n';
 
 	const asio::system_executor Executor = asio::get_associated_executor(asio::use_awaitable);
 	tcp::socket Socket = tcp::socket(Executor);
