@@ -35,16 +35,21 @@ asio::awaitable<void> Network::SocketHandler(tcp::socket Socket)
 					co_await Handle::Login(Socket);
 					break;
 				}
+				case ClientStates::ModuleState:
+				{
+					co_await Handle::Module(Socket);
+					break;
+				}
 				default:
 				{
-					std::cout << "[!] Invalid client state.";
+					std::cout << "[!] Invalid client state." << '\n';
 					break;
 				}
 			}
 		}
 		catch (std::exception& Ex)
 		{
-			std::cout << "[!] Exception: " << Ex.what() << std::endl;
+			std::cout << "[!] Exception: " << Ex.what() << '\n';
 			MessageBoxA(nullptr, "The server closed the connection.", "Error (94)", MB_ICONERROR | MB_OK);
 			ExitProcess(94);
 			break;

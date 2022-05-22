@@ -28,7 +28,7 @@ using namespace CryptoPP;
 
 namespace Network
 {
-#define NETWORK_CHUNK_SIZE			4096
+#define NETWORK_CHUNK_SIZE			8192					// A maximum of 8 kilobytes
 #define NETWORK_PORT_INT			42069
 #define NETWORK_IP_AND_PORT_STR		"127.0.0.1", "42069"
 
@@ -41,8 +41,8 @@ namespace Network
 		Module = 1482
 	};
 
-	enum class ModuleIds : int
+	typedef enum ModuleIds : int
 	{
-		Test = 2610,
+		Test = 1337
 	};
 }

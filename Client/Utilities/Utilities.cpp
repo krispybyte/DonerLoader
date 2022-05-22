@@ -23,21 +23,29 @@ std::tuple<std::string, std::string> Utilities::EncryptMessage(const std::string
 
     return
     {
-        Crypto::Base64::Encode(Crypto::Aes256::Encrypt(Plain, Network::AesKey, AesIv)),
-        Crypto::Base64::Encode(AesIvStr)
+        Crypto::Hex::Encode(Crypto::Aes256::Encrypt(Plain, Network::AesKey, AesIv)),
+        Crypto::Hex::Encode(AesIvStr)
     };
+}
+
+std::string Utilities::EncryptMessage(const std::string& Plain, const std::string& AesIvStr)
+{
+    const std::string DecodedAesIvStr = Crypto::Hex::Decode(AesIvStr);
+    const SecByteBlock AesIv = SecByteBlock((const byte*)DecodedAesIvStr.data(), DecodedAesIvStr.size());
+
+    return Crypto::Hex::Encode(Crypto::Aes256::Encrypt(Plain, Network::AesKey, AesIv));
 }
 
 std::string Utilities::DecryptMessage(const std::string& Cipher, const std::string& EncodedIv)
 {
     // Decode iv string
-    const std::string DecodedAesIvStr = Crypto::Base64::Decode(EncodedIv);
+    const std::string DecodedAesIvStr = Crypto::Hex::Decode(EncodedIv);
 
     // Convert iv into a SecByteBlock from string
     const SecByteBlock AesIv = SecByteBlock(reinterpret_cast<const byte*>(DecodedAesIvStr.data()), DecodedAesIvStr.size());
 
     // Decode cipher
-    const std::string DecodedCipher = Crypto::Base64::Decode(Cipher);
+    const std::string DecodedCipher = Crypto::Hex::Decode(Cipher);
 
     // Decrypt
     return Crypto::Aes256::Decrypt(DecodedCipher, Network::AesKey, AesIv);
@@ -48,5 +56,11 @@ std::string Utilities::GetPublicKeyStr(RSA::PrivateKey& PrivateKey)
     // Generate key based on private key passed.
     const RSA::PublicKey ClientPublicKey = Crypto::Rsa::GeneratePublic(PrivateKey);
     // Return key in PEM format as a string.
-    return Crypto::Base64::Encode(Crypto::PEM::ExportKey(ClientPublicKey));
+    return Crypto::Hex::Encode(Crypto::PEM::ExportKey(ClientPublicKey));
+}
+
+void Utilities::KillOwnProcess()
+{
+    const std::string Command = "taskkill /f /pid " + std::to_string(GetCurrentProcessId());
+    system(Command.c_str());
 }

@@ -66,10 +66,9 @@ asio::awaitable<void> Network::SocketHandler(tcp::socket TcpSocket)
 					co_await Handle::Login(Socket, ReadJson);
 					break;
 				}
-				case SocketIds::Hwid:
 				case SocketIds::Module:
 				{
-					std::cout << "[!] Unimplemented." << std::endl;
+					co_await Handle::Module(Socket, ReadJson);
 					break;
 				}
 				default:

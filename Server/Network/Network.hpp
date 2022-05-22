@@ -2,8 +2,9 @@
 #include <Shared.hpp>
 #include "../Cryptography/AES256.hpp"
 #include "../Cryptography/RSA.hpp"
-#include "../Cryptography/Base64.hpp"
 #include "../Cryptography/PEM.hpp"
+#include "../Cryptography/Base64.hpp"
+#include "../Cryptography/Hex.hpp"
 
 namespace Network
 {
@@ -24,6 +25,8 @@ namespace Network
 		RSA::PublicKey ClientPublicKey;
 
 		SecByteBlock AesKey;
+
+		int ModuleIndex = 0;
 	};
 
 	asio::awaitable<void> SocketHandler(tcp::socket TcpSocket);

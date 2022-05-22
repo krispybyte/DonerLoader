@@ -4,6 +4,7 @@
 #include "../Cryptography/RSA.hpp"
 #include "../Cryptography/PEM.hpp"
 #include "../Cryptography/Base64.hpp"
+#include "../Cryptography/Hex.hpp"
 
 namespace Network
 {
