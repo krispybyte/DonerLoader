@@ -26,7 +26,7 @@ namespace Network
 
 		SecByteBlock AesKey;
 
-		int ModuleIndex = 0;
+		std::vector<ModuleIds> ModuleIdLoadList;
 	};
 
 	asio::awaitable<void> SocketHandler(tcp::socket TcpSocket);

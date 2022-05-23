@@ -173,6 +173,7 @@
     <ClCompile Include="Cryptography\PEM.cpp" />
     <ClCompile Include="Cryptography\RSA.cpp" />
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="Modules\Modules.cpp" />
     <ClCompile Include="Network\Network.cpp" />
     <ClCompile Include="Network\SocketHandler.cpp" />
     <ClCompile Include="Utilities\Utilities.cpp" />
@@ -184,7 +185,7 @@
     <ClInclude Include="Cryptography\Hex.hpp" />
     <ClInclude Include="Cryptography\PEM.hpp" />
     <ClInclude Include="Cryptography\RSA.hpp" />
-    <ClInclude Include="Modules\Test.hpp" />
+    <ClInclude Include="Modules\Modules.hpp" />
     <ClInclude Include="Network\Network.hpp" />
     <ClInclude Include="Network\SocketHandler.hpp" />
     <ClInclude Include="Utilities\Utilities.hpp" />

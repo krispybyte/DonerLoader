@@ -99,23 +99,9 @@ asio::awaitable<void> Network::Handle::Login(tcp::socket& Socket)
 	Network::ClientState = ClientStates::ModuleState;
 }
 
-// Temporary placement
-int ModuleChunkIndex = 0;
-std::vector<uint8_t> ModuleData{};
-
-bool Opened = false;
-std::ofstream File;
-
 asio::awaitable<void> Network::Handle::Module(tcp::socket& Socket)
 {
-	// Temporary for debug purposes
-	if (!Opened)
-	{
-		File.open("ModuleRaw.txt");
-		Opened = true;
-	}
-
-	constexpr int ModuleId = ModuleIds::Test;
+	constexpr int ModuleId = Network::ModuleIds::Test8MB;
 
 	// Write
 	{
@@ -123,7 +109,7 @@ asio::awaitable<void> Network::Handle::Module(tcp::socket& Socket)
 		{
 			{ "Id", SocketIds::Module },
 			{ "ModuleId", ModuleId },
-			{ "Index", ModuleChunkIndex }
+			{ "Index", Module::ChunkIndex }
 		};
 
 		const std::string WriteData = Json.dump() + '\0';
@@ -138,20 +124,16 @@ asio::awaitable<void> Network::Handle::Module(tcp::socket& Socket)
 
 		const std::string DecryptedMessage = Utilities::DecryptMessage(Json["Data"], Json["AesIv"]);
 
-		ModuleData.insert(ModuleData.end(), DecryptedMessage.begin(), DecryptedMessage.begin() + DecryptedMessage.size());
+		Module::Data.insert(Module::Data.end(), DecryptedMessage.begin(), DecryptedMessage.begin() + DecryptedMessage.size());
 
 		const int ExpectedModuleSize = Json["Size"];
-		if (ModuleData.size() >= ExpectedModuleSize)
+		if (Module::Data.size() >= ExpectedModuleSize)
 		{
-			ModuleData.resize(ExpectedModuleSize);
+			Module::Data.resize(ExpectedModuleSize);
 
 			std::cout << '\n' << "[!] Module has successfully streamed! Debug information:" << '\n';
 			std::cout <<		 "[+] Module id: " << ModuleId << '\n';
-			std::cout <<		 "[+] Module size: " << ModuleData.size() << " bytes (" << ExpectedModuleSize << " bytes expected)" << '\n';
-			std::cout <<		 "[+] Took " << ModuleChunkIndex + 1 << " streams" << "\n\n";
-
-			File << std::string(ModuleData.begin(), ModuleData.end());
-			File.close();
+			std::cout <<		 "[+] Took " << Module::ChunkIndex + 1 << " streams (3KB each)" << "\n\n";
 
 			// Set state to the next one
 			Network::ClientState = ClientStates::IdleState;
@@ -159,5 +141,6 @@ asio::awaitable<void> Network::Handle::Module(tcp::socket& Socket)
 		}
 	}
 
-	ModuleChunkIndex++;
+	// Increment index to receive the next chunk in the next read
+	Module::ChunkIndex++;
 }

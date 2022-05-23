@@ -42,6 +42,9 @@
     <ClCompile Include="Cryptography\Hex.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Modules\Modules.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Common.hpp">
@@ -68,10 +71,10 @@
     <ClInclude Include="Network\SocketHandler.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Modules\Test.hpp">
+    <ClInclude Include="Cryptography\Hex.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Cryptography\Hex.hpp">
+    <ClInclude Include="Modules\Modules.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

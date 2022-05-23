@@ -43,6 +43,7 @@ namespace Network
 
 	typedef enum ModuleIds : int
 	{
-		Test = 1337
+		Test8MB = 0,
+		Test1KB = 1
 	};
 }

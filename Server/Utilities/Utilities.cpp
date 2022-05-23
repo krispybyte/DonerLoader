@@ -1,4 +1,6 @@
 #include "Utilities.hpp"
+#include <string>
+#include <random>
 #include <fstream>
 
 std::string Utilities::RandomString(const std::size_t Length)
@@ -53,7 +55,7 @@ std::string Utilities::GetPublicKeyStr(RSA::PrivateKey& PrivateKey)
     return Crypto::Hex::Encode(Crypto::PEM::ExportKey(ClientPublicKey));
 }
 
-bool Utilities::ReadFile(const std::string_view FileName, std::vector<uint8_t>& ReadFile)
+bool Utilities::ReadFile(const std::string_view FileName, std::vector<std::uint8_t>& ReadFile)
 {
     std::ifstream FileStream(FileName.data(), std::ios::binary);
 

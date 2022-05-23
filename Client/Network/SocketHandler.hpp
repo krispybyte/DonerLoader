@@ -11,3 +11,9 @@ namespace Network::Handle
 	asio::awaitable<void> Login(tcp::socket& Socket);
 	asio::awaitable<void> Module(tcp::socket& Socket);
 }
+
+namespace Module
+{
+	inline int ChunkIndex = 0;
+	inline std::vector<std::uint8_t> Data;
+}

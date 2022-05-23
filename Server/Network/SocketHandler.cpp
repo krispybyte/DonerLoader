@@ -1,6 +1,6 @@
 #include "SocketHandler.hpp"
 #include "../Utilities/Utilities.hpp"
-#include "../Modules/Test.hpp"
+#include "../Modules/Modules.hpp"
 
 asio::awaitable<void> Network::Handle::Idle(Network::Socket& Socket)
 {
@@ -74,33 +74,38 @@ asio::awaitable<void> Network::Handle::Login(Network::Socket& Socket, json& Read
 	}
 }
 
-std::vector<uint8_t> StreamedModule;
-inline bool LoadedBinary = false;
-
 asio::awaitable<void> Network::Handle::Module(Network::Socket& Socket, json& ReadJson)
 {
-	if (!LoadedBinary)
+	// Read
+	const int ModuleId = ReadJson["ModuleId"];
+
+	// Validate module id
+	if (ModuleId < ModuleIds::Test8MB || ModuleId > ModuleIds::Test1KB)
 	{
-		constexpr std::string_view FilePath = "Modules/8KB_BIN.dll";
-
-		if (!Utilities::ReadFile(FilePath, StreamedModule))
-		{
-			std::cout << "[!] Failed loading module!" << '\n';
-			Socket.Get().close();
-			co_return;
-		}
-
-		std::cout << "[+] Loaded " << FilePath.data() << "!" << '\n';
-		LoadedBinary = true;
+		std::cout << "[!] Invalid module id received!" << '\n';
+		Socket.Get().close();
+		co_return;
 	}
+
+	// Verify the user isn't trying to load the
+	// same module for the second time.
+	if (std::find(Socket.ModuleIdLoadList.begin(), Socket.ModuleIdLoadList.end(), ModuleId) != Socket.ModuleIdLoadList.end())
+	{
+		std::cout << "[!] User already loaded this module!" << '\n';
+		Socket.Get().close();
+		co_return;
+	}
+
+	// Get module by index
+	const auto& Module = Modules::List[ModuleId];
 
 	const int ModuleChunkIndex = ReadJson["Index"];
 	constexpr int ModuleChunkSize = 3072; // 3 Kilobytes
 
 	// Write
 	{
-		const std::string ModuleChunkData = std::string(StreamedModule.begin() + (ModuleChunkSize * ModuleChunkIndex),
-														StreamedModule.begin() + (ModuleChunkSize * ModuleChunkIndex) + ModuleChunkSize);
+		const std::string ModuleChunkData = std::string(Module.begin() + static_cast<std::uintptr_t>(ModuleChunkSize * ModuleChunkIndex),
+														Module.begin() + static_cast<std::uintptr_t>(ModuleChunkSize * ModuleChunkIndex) + ModuleChunkSize);
 
 		const auto EncryptionData = Utilities::EncryptMessage(ModuleChunkData, Socket.AesKey);
 
@@ -111,7 +116,7 @@ asio::awaitable<void> Network::Handle::Module(Network::Socket& Socket, json& Rea
 		{
 			{ "AesIv", AesIv },
 			{ "Data", EncryptedMessage },
-			{ "Size", StreamedModule.size() }
+			{ "Size", Module.size() }
 		};
 
 		if (Json.dump().size() > NETWORK_CHUNK_SIZE)
@@ -123,5 +128,26 @@ asio::awaitable<void> Network::Handle::Module(Network::Socket& Socket, json& Rea
 
 		const std::string WriteData = Json.dump() + '\0';
 		co_await Socket.Get().async_write_some(asio::buffer(WriteData, WriteData.size()), asio::use_awaitable);
+
+		// Check if we're at the last iteration, if we are, push the
+		// module id onto the socket's module load list and return
+		{
+			// + 1 due to it still getting 3KB for the first chunk, despite it's ID being 0
+			const int ClientModuleSize = ModuleChunkData.size() * (ModuleChunkIndex + 1);
+			if (ClientModuleSize >= Module.size())
+			{
+				Socket.ModuleIdLoadList.push_back(static_cast<ModuleIds>(ModuleId));
+
+				std::cout << '\n' << "[!] Module has successfully streamed!" << '\n';
+				std::cout		  << "[!] This user has streamed " << Socket.ModuleIdLoadList.size() << " module(s) so far!" << '\n';
+				std::cout		  << "[!] Module streamed by this user so far (by ID):" << '\n';
+				for (const int Id : Socket.ModuleIdLoadList)
+				{
+					std::cout << "[+] Module #" << Id << '\n';
+				}
+
+				co_return;
+			}
+		}
 	}
 }
