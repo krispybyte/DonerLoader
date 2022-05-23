@@ -133,7 +133,7 @@ asio::awaitable<void> Network::Handle::Module(tcp::socket& Socket)
 
 			std::cout << '\n' << "[!] Module has successfully streamed! Debug information:" << '\n';
 			std::cout <<		 "[+] Module id: " << ModuleId << '\n';
-			std::cout <<		 "[+] Took " << Module::ChunkIndex + 1 << " streams (3KB each)" << "\n\n";
+			std::cout <<		 "[+] Took " << Module::ChunkIndex + 1 << " streams (3KB each)";
 
 			// Set state to the next one
 			Network::ClientState = ClientStates::IdleState;

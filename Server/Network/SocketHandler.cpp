@@ -119,14 +119,15 @@ asio::awaitable<void> Network::Handle::Module(Network::Socket& Socket, json& Rea
 			{ "Size", Module.size() }
 		};
 
-		if (Json.dump().size() > NETWORK_CHUNK_SIZE)
+		const std::string WriteData = Json.dump() + '\0';
+
+		if (WriteData.size() > NETWORK_CHUNK_SIZE)
 		{
-			std::cout << "[!] Prepared too large of a socket! Terminating client connection." << '\n';
+			std::cout << "[!] Prepared too large of a socket buffer! Terminating client connection." << '\n';
 			Socket.Get().close();
 			co_return;
 		}
 
-		const std::string WriteData = Json.dump() + '\0';
 		co_await Socket.Get().async_write_some(asio::buffer(WriteData, WriteData.size()), asio::use_awaitable);
 
 		// Check if we're at the last iteration, if we are, push the
