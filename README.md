@@ -5,7 +5,7 @@ Also written in C++20 due to the ease of development when building an asynchrono
 # Task-list
 - [x] Public key exchange.
 - [x] Aes key and initialization vector exchange.
-- [ ] Module streaming.
+- [x] Module streaming.
 - [ ] Hardware ID check.
 - [ ] Heartbeat.
 - [ ] Database implementation using mongodb.
