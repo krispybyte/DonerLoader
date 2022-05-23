@@ -74,15 +74,33 @@ asio::awaitable<void> Network::Handle::Login(Network::Socket& Socket, json& Read
 	}
 }
 
+std::vector<uint8_t> StreamedModule;
+inline bool LoadedBinary = false;
+
 asio::awaitable<void> Network::Handle::Module(Network::Socket& Socket, json& ReadJson)
 {
+	if (!LoadedBinary)
+	{
+		constexpr std::string_view FilePath = "Modules/8KB_BIN.dll";
+
+		if (!Utilities::ReadFile(FilePath, StreamedModule))
+		{
+			std::cout << "[!] Failed loading module!" << '\n';
+			Socket.Get().close();
+			co_return;
+		}
+
+		std::cout << "[+] Loaded " << FilePath.data() << "!" << '\n';
+		LoadedBinary = true;
+	}
+
 	const int ModuleChunkIndex = ReadJson["Index"];
 	constexpr int ModuleChunkSize = 3072; // 3 Kilobytes
 
 	// Write
 	{
-		const std::string ModuleChunkData = std::string(Modules::Test.begin() + (ModuleChunkSize * ModuleChunkIndex),
-														Modules::Test.begin() + (ModuleChunkSize * ModuleChunkIndex) + ModuleChunkSize);
+		const std::string ModuleChunkData = std::string(StreamedModule.begin() + (ModuleChunkSize * ModuleChunkIndex),
+														StreamedModule.begin() + (ModuleChunkSize * ModuleChunkIndex) + ModuleChunkSize);
 
 		const auto EncryptionData = Utilities::EncryptMessage(ModuleChunkData, Socket.AesKey);
 
@@ -93,13 +111,14 @@ asio::awaitable<void> Network::Handle::Module(Network::Socket& Socket, json& Rea
 		{
 			{ "AesIv", AesIv },
 			{ "Data", EncryptedMessage },
-			{ "Size", Modules::Test.size() }
+			{ "Size", StreamedModule.size() }
 		};
 
 		if (Json.dump().size() > NETWORK_CHUNK_SIZE)
 		{
 			std::cout << "[!] Prepared too large of a socket! Terminating client connection." << '\n';
 			Socket.Get().close();
+			co_return;
 		}
 
 		const std::string WriteData = Json.dump() + '\0';

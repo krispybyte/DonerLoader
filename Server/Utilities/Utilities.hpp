@@ -14,4 +14,6 @@ namespace Utilities
     // Generates the public key based on the private key
     // fed and returns it as a string in the PEM format.
     std::string GetPublicKeyStr(RSA::PrivateKey& PrivateKey);
+    // File reading for module storing.
+    bool ReadFile(const std::string_view FilePath, std::vector<uint8_t>& ReadFile);
 }
