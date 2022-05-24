@@ -1,20 +1,20 @@
 # Information
-This is an asynchronous client and server project using boost's TCP library, asio.
-Also written in C++20 due to the ease of development when building an asynchronous application using the new co routines.
+`Network` is an asynchronous client and server communication project using Boost's TCP library, `Asio`.
+The `Network` project is written in `C++20` due to the ease of development when building an asynchronous application using the new [co routines](https://en.cppreference.com/w/cpp/language/coroutines "cppreference").
 
 # Task-list
 - [x] Public key exchange.
 - [x] Aes key and initialization vector exchange.
 - [x] Module streaming.
-- [ ] Hardware ID check.
+- [x] Client state verification handled over the server.
+- [ ] Hardware ID check (using MongoDb).
+- [ ] Login check (using MongoDb).
 - [ ] Heartbeat.
-- [ ] Database implementation using mongodb.
 - [ ] Module injection.
 - [ ] Module relocations and imports handled over the server.
-- [ ] Client state verification handled over the server.
-- [ ] Small gui?
-- [ ] Client pre-loader in the future.
-- [ ] SHA256 for json key values.
+- [ ] GUI.
+- [ ] Client pre-loader.
+- [ ] SHA256 for the json key values.
 
 # Setup
 ### Cloning

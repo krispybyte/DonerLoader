@@ -31,7 +31,7 @@ asio::awaitable<void> Network::Handle::Initialize(Network::Socket& Socket, json&
 		const std::string ServerPublicKey = Utilities::GetPublicKeyStr(Socket.ServerPrivateKey);
 
 		// Convert aes key to a string then encrypt it using the client's
-		// public rsa key which was read, and then encode it using base64
+		// public rsa key which was read, and then encode it using hex
 		std::string AesKey = std::string(reinterpret_cast<const char*>(Socket.AesKey.data()), Socket.AesKey.size());
 		AesKey = Crypto::Hex::Encode(Crypto::Rsa::Encrypt(AesKey, Socket.ClientPublicKey));
 
@@ -45,11 +45,20 @@ asio::awaitable<void> Network::Handle::Initialize(Network::Socket& Socket, json&
 		co_await Socket.Get().async_write_some(asio::buffer(WriteData, WriteData.size()), asio::use_awaitable);
 	}
 
+	// Verify keys have exchanged for this user
+	Socket.HasInitialized = true;
 	std::cout << "[+] Exchanged keys." << '\n';
 }
 
 asio::awaitable<void> Network::Handle::Login(Network::Socket& Socket, json& ReadJson)
 {
+	if (!Socket.HasInitialized)
+	{
+		std::cout << "[!] User hasn't initialized before trying to log in!" << '\n';
+		Socket.Get().close();
+		co_return;
+	}
+
 	// Read
 	{
 		const std::string DecryptedMessage = Utilities::DecryptMessage(ReadJson["Data"], ReadJson["AesIv"], Socket.AesKey);
@@ -72,10 +81,20 @@ asio::awaitable<void> Network::Handle::Login(Network::Socket& Socket, json& Read
 		const std::string WriteData = Json.dump() + '\0';
 		co_await Socket.Get().async_write_some(asio::buffer(WriteData, WriteData.size()), asio::use_awaitable);
 	}
+
+	// Verify user has logged in
+	Socket.HasLoggedIn = true;
 }
 
 asio::awaitable<void> Network::Handle::Module(Network::Socket& Socket, json& ReadJson)
 {
+	if (!Socket.HasLoggedIn)
+	{
+		std::cout << "[!] User hasn't logged in before trying to stream the module!" << '\n';
+		Socket.Get().close();
+		co_return;
+	}
+
 	// Read
 	const int ModuleId = ReadJson["ModuleId"];
 
@@ -147,6 +166,9 @@ asio::awaitable<void> Network::Handle::Module(Network::Socket& Socket, json& Rea
 				{
 					std::cout << "[+] Module #" << Id << '\n';
 				}
+
+				// Verify user has streamed a module
+				Socket.HasStreamedModule = true;
 
 				co_return;
 			}

@@ -6,13 +6,11 @@ int main()
 	SetConsoleTitleA("Server");
 
 	// Load all modules
+	if (!Modules::Load(Network::ModuleIds::Test8MB, "Modules/Test8MB.dll") ||
+		!Modules::Load(Network::ModuleIds::Test1KB, "Modules/Test1KB.dll"))
 	{
-		if (!Modules::Load(Network::ModuleIds::Test8MB, "Modules/Test8MB.dll") ||
-			!Modules::Load(Network::ModuleIds::Test1KB, "Modules/Test1KB.dll"))
-		{
-			std::cout << "[!] Failed loading a module." << '\n';
-			return std::getchar();
-		}
+		std::cout << "[!] Failed loading a module." << '\n';
+		return std::getchar();
 	}
 
 	// Create server

@@ -35,6 +35,10 @@ namespace Network
 		SecByteBlock AesKey;
 
 		std::vector<ModuleIds> ModuleIdLoadList;
+
+		bool HasInitialized = false;
+		bool HasLoggedIn = false;
+		bool HasStreamedModule = false;
 	};
 
 	asio::awaitable<void> SocketHandler(tcp::socket TcpSocket);
