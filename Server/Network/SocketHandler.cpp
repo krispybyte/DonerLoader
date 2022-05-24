@@ -104,8 +104,8 @@ asio::awaitable<void> Network::Handle::Module(Network::Socket& Socket, json& Rea
 
 	// Write
 	{
-		const std::string ModuleChunkData = std::string(Module.begin() + static_cast<std::uintptr_t>(ModuleChunkSize * ModuleChunkIndex),
-														Module.begin() + static_cast<std::uintptr_t>(ModuleChunkSize * ModuleChunkIndex) + ModuleChunkSize);
+		const std::string ModuleChunkData = std::string(Module.begin() + static_cast<std::uintptr_t>(ModuleChunkSize) * ModuleChunkIndex,
+														Module.begin() + static_cast<std::uintptr_t>(ModuleChunkSize) * ModuleChunkIndex + ModuleChunkSize);
 
 		const auto EncryptionData = Utilities::EncryptMessage(ModuleChunkData, Socket.AesKey);
 
@@ -142,6 +142,7 @@ asio::awaitable<void> Network::Handle::Module(Network::Socket& Socket, json& Rea
 				std::cout << '\n' << "[!] Module has successfully streamed!" << '\n';
 				std::cout		  << "[!] This user has streamed " << Socket.ModuleIdLoadList.size() << " module(s) so far!" << '\n';
 				std::cout		  << "[!] Module streamed by this user so far (by ID):" << '\n';
+
 				for (const int Id : Socket.ModuleIdLoadList)
 				{
 					std::cout << "[+] Module #" << Id << '\n';

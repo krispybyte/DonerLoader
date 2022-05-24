@@ -86,8 +86,11 @@ asio::awaitable<void> Network::SocketHandler(tcp::socket TcpSocket)
 	}
 
 Disconnect:
-	// Client will close socket at this point
-	ConnectionList.erase(std::remove(ConnectionList.begin(), ConnectionList.end(), Socket.GetIpAddress()), ConnectionList.end());
+	// Client will close socket at this point so
+	// we'll remove the ip address from the list
+	const auto IpAddressPosition = std::find(ConnectionList.begin(), ConnectionList.end(), IpAddress);
+	if (IpAddressPosition != ConnectionList.end())
+		ConnectionList.erase(IpAddressPosition);
 }
 
 asio::awaitable<void> Network::ConnectionHandler(tcp::acceptor& TcpAcceptor)

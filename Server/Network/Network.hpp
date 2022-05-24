@@ -16,7 +16,15 @@ namespace Network
 		tcp::socket& _Socket;
 	public:
 		Socket(tcp::socket& Socket) : _Socket(Socket) { }
-		~Socket() { this->_Socket.close(); }
+		~Socket()
+		{
+			// Close socket connection
+			this->_Socket.close();
+
+			// Erase module id's loaded from memory
+			this->ModuleIdLoadList.erase(ModuleIdLoadList.begin(), ModuleIdLoadList.end());
+			this->ModuleIdLoadList.shrink_to_fit();
+		}
 
 		tcp::socket& Get();
 		asio::ip::address GetIpAddress();
