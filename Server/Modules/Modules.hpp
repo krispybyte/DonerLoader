@@ -3,7 +3,7 @@
 
 namespace Modules
 {
-	typedef std::vector<std::uint8_t> Module;
+	typedef std::vector<uint8_t> Module;
 
 	// Module Id (int), Module data (vector)
 	inline std::unordered_map<int, Module> List;

@@ -99,8 +99,18 @@ asio::awaitable<void> Network::Handle::Login(tcp::socket& Socket)
 	Network::ClientState = ClientStates::ModuleState;
 }
 
+bool Opened = false;
+std::ofstream File;
+
 asio::awaitable<void> Network::Handle::Module(tcp::socket& Socket)
 {
+	// Temporary for debug purposes
+	if (!Opened)
+	{
+		File.open("Modules/ClientRaw.txt", std::ios::binary);
+		Opened = true;
+	}
+
 	constexpr int ModuleId = Network::ModuleIds::Test8MB;
 
 	// Write
@@ -134,6 +144,9 @@ asio::awaitable<void> Network::Handle::Module(tcp::socket& Socket)
 			std::cout << '\n' << "[!] Module has successfully streamed! Debug information:" << '\n';
 			std::cout <<		 "[+] Module id: " << ModuleId << '\n';
 			std::cout <<		 "[+] Took " << Module::ChunkIndex + 1 << " streams (3KB each)";
+
+			File << std::string(Module::Data.begin(), Module::Data.end());
+			File.close();
 
 			// Set state to the next one
 			Network::ClientState = ClientStates::IdleState;

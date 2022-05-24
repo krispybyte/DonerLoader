@@ -1,7 +1,7 @@
 #include "Utilities.hpp"
 #include <string>
 #include <random>
-#include <fstream>
+#include <cryptopp/files.h>
 
 std::string Utilities::RandomString(const std::size_t Length)
 {
@@ -55,26 +55,17 @@ std::string Utilities::GetPublicKeyStr(RSA::PrivateKey& PrivateKey)
     return Crypto::Hex::Encode(Crypto::PEM::ExportKey(ClientPublicKey));
 }
 
-bool Utilities::ReadFile(const std::string_view FileName, std::vector<std::uint8_t>& ReadFile)
+bool Utilities::ReadFile(const std::string_view FilePath, std::vector<uint8_t>& ReadFile)
 {
-    std::ifstream FileStream(FileName.data(), std::ios::binary);
+    std::ifstream FileStream(FilePath, std::ios::binary);
 
-    if (!FileStream.good())
+    if (!FileStream)
     {
         return false;
     }
 
-    FileStream.unsetf(std::ios::skipws);
-
-    FileStream.seekg(0, std::ios::end);
-    const std::size_t Size = FileStream.tellg();
-    FileStream.seekg(0, std::ios::beg);
-
-    ReadFile.resize(Size);
-
-    FileStream.read(reinterpret_cast<char*>(ReadFile.data()), Size);
+    ReadFile.assign(std::istreambuf_iterator<char>(FileStream), std::istreambuf_iterator<char>());
 
     FileStream.close();
-
-    return true;
+    return ReadFile.size();
 }
