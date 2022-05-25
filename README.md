@@ -1,20 +1,18 @@
 # Information
-`Network` is an asynchronous client and server communication project using Boost's TCP library, `Asio`.
+`Network` is an asynchronous client and server communication project using Boost's TCP library, [Asio](https://github.com/chriskohlhoff/asio "Asio on github").
 The `Network` project is written in `C++20` due to the ease of development when building an asynchronous application using the new [co routines](https://en.cppreference.com/w/cpp/language/coroutines "cppreference").
 
 # Task-list
-- [x] Public key exchange.
-- [x] Aes key and initialization vector exchange.
-- [x] Module streaming.
-- [x] Client state verification handled over the server.
-- [x] GUI.
-- [ ] SHA256 for the json key values.
-- [ ] Hardware ID check (using MongoDb).
-- [ ] Login check (using MongoDb).
-- [ ] Heartbeat.
-- [ ] Module injection.
-- [ ] Module relocations and imports handled over the server.
-- [ ] Client pre-loader.
+- [x] RSA & AES256 Key exchange
+- [x] Module streaming
+- [x] Client state verification handled over the server
+- [x] GUI (using [ImGui](https://github.com/ocornut/imgui "ImGui on github"))
+- [ ] SHA256 for the json key values
+- [ ] Login & Hardware ID check (using [MongoDB](https://github.com/mongodb/mongo-cxx-driver "MongoDB on github"))
+- [ ] Heartbeat
+- [ ] Module injection
+- [ ] Module relocations and imports handled over the server
+- [ ] Client pre-loader
 
 # Setup
 ### Cloning
@@ -51,3 +49,4 @@ git clone --recursive https://github.com/stackey-net/Network.git
 - [Cryptopp](https://github.com/weidai11/cryptopp "Cryptopp on github")
 - [Json](https://github.com/nlohmann/json "Json on github")
 - [MongoDB CXX](https://github.com/mongodb/mongo-cxx-driver "MongoDB CXX on github")
+- [ImGui](https://github.com/ocornut/imgui "ImGui on github")
