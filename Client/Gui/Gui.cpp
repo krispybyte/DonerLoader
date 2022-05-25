@@ -1,260 +1,301 @@
 #include "Gui.hpp"
+#include <backends/imgui_impl_win32.h>
+#include <backends/imgui_impl_dx9.h>
 
 bool LoggedIn = false;
 bool Streamed = false;
 
 void Gui::Render()
 {
-    ImGui::SetNextWindowPos({ -1, -1 });
-    ImGui::SetNextWindowSize(AppSize);
-    if (ImGui::Begin("Client", 0, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoTitleBar))
-    {
-        switch (Network::ClientState)
-        {
-            case Network::ClientStates::IdleState:
-            {
-                if (!LoggedIn)
-                {
-                    if (ImGui::Button("Login", { AppSize.x - 31, 22 }))
-                    {
-                        Network::ClientState = Network::ClientStates::LoginState;
-                        LoggedIn = true;
-                    }
+	ImGui::SetNextWindowPos({ 0, 0 });
+	ImGui::SetNextWindowSize(Size);
 
-                    break;
-                }
+	ImGui::Begin("Client", &ShouldRun, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoSavedSettings);
+	{
+		switch (Network::ClientState)
+		{
+			case Network::ClientStates::IdleState:
+			{
+				if (!LoggedIn)
+				{
+					if (ImGui::Button("Login", { 80, 32 }))
+					{
+						Network::ClientState = Network::ClientStates::LoginState;
+						LoggedIn = true;
+					}
 
-                ImGui::Text("Logged in, welcome!");
+					break;
+				}
 
-                if (!Streamed)
-                {
-                    if (ImGui::Button("Stream content", { AppSize.x - 31, 22 }))
-                    {
-                        Network::ClientState = Network::ClientStates::ModuleState;
-                        Streamed = true;
-                    }
+				ImGui::Text("Logged in, welcome!");
 
-                    break;
-                }
+				if (!Streamed)
+				{
+					if (ImGui::Button("Stream", { 80, 32 }))
+					{
+						Network::ClientState = Network::ClientStates::ModuleState;
+						Streamed = true;
+					}
 
-                ImGui::Text("Successfully streamed!");
+					break;
+				}
 
-                if (ImGui::Button("Exit", { AppSize.x - 31, 22 }))
-                {
-                    FinishLoop = true;
-                }
+				ImGui::Text("Successfully streamed!");
 
-                break;
-            }
-            case Network::ClientStates::InitializeState:
-            {
-                ImGui::Text("Initializing...");
-                break;
-            }
-            case Network::ClientStates::LoginState:
-            {
-                ImGui::Text("Logging you in...");
-                break;
-            }
-            case Network::ClientStates::ModuleState:
-            {
-                ImGui::Text("Streaming module...");
-                break;
-            }
-            default:
-            {
-                MessageBoxA(nullptr, "Invalid state.", "Error (55)", MB_ICONERROR | MB_OK);
-                FinishLoop = true;
-                return;
-            }
-        }
+				if (ImGui::Button("Exit", { 80, 32 }))
+				{
+					ShouldRun = false;
+				}
 
-        ImGui::End();
-    }
+				break;
+			}
+			case Network::ClientStates::InitializeState:
+			{
+				ImGui::Text("Exchanging keys...");
+				break;
+			}
+			case Network::ClientStates::LoginState:
+			{
+				ImGui::Text("Logging you in...");
+				break;
+			}
+			case Network::ClientStates::ModuleState:
+			{
+				ImGui::Text("Streaming module...");
+				break;
+			}
+			default:
+			{
+				MessageBoxA(nullptr, "Invalid state.", "Error (55)", MB_ICONERROR | MB_OK);
+				ShouldRun = false;
+				return;
+			}
+		}
+
+		ImGui::End();
+	}
 }
 
 bool Gui::Run()
 {
-    Class = { sizeof(WNDCLASSEX), CS_CLASSDC, WndProc, 0L, 0L, GetModuleHandleA(nullptr), nullptr, nullptr, nullptr, nullptr, "Client", nullptr };
-    RegisterClassExA(&Class);
-    Hwnd = CreateWindowA(Class.lpszClassName, "Client", WS_OVERLAPPEDWINDOW, ScreenSize.x / 2 - AppSize.x / 2, ScreenSize.y / 2 - AppSize.y / 2, AppSize.x, AppSize.y, nullptr, nullptr, Class.hInstance, nullptr);
+	// Create
+	CreateWnd("Client");
+	CreateDevice();
+	CreateImGui();
 
-    // Initialize Direct3D
-    if (!CreateDeviceD3D(Hwnd))
-    {
-        CleanupDeviceD3D();
-        UnregisterClassA(Class.lpszClassName, Class.hInstance);
-        return false;
-    }
+	// Run
+	while (ShouldRun)
+	{
+		BeginRender();
+		Render();
+		EndRender();
+	}
 
-    // Show the window
-    ShowWindow(Hwnd, SW_SHOWDEFAULT);
-    UpdateWindow(Hwnd);
+	// Destroy
+	ClearImGui();
+	ClearDevice();
+	ClearWnd();
 
-    // Setup Dear ImGui context
-    ImGui::CreateContext();
-    ImGuiIO& Io = ImGui::GetIO(); (void)Io;
-
-    // Enable Keyboard Controls
-    Io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
-
-    // Setup Dear ImGui style
-    ImGui::StyleColorsClassic();
-
-    // Setup Platform/Renderer backends
-    ImGui_ImplWin32_Init(Hwnd);
-    ImGui_ImplDX9_Init(DxDevice);
-
-    // Our state
-    ImVec4 ClearColor = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
-
-    if (FinishLoop)
-    {
-        return true;
-    }
-
-    // Main loop
-    while (!FinishLoop)
-    {
-        MSG Msg;
-
-        while (PeekMessageA(&Msg, nullptr, 0, 0, PM_REMOVE))
-        {
-            TranslateMessage(&Msg);
-            DispatchMessageA(&Msg);
-
-            // Handle application exitting
-            if (Msg.message == WM_QUIT)
-            {
-                FinishLoop = true;
-            }
-        }
-
-        // Begin the ImGui frame
-        ImGui_ImplDX9_NewFrame();
-        ImGui_ImplWin32_NewFrame();
-        ImGui::NewFrame();
-
-        // Render our GUI
-        Gui::Render();
-
-        // Frame rendering
-        ImGui::EndFrame();
-
-        DxDevice->SetRenderState(D3DRS_ZENABLE, false);
-        DxDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, false);
-        DxDevice->SetRenderState(D3DRS_SCISSORTESTENABLE, false);
-
-        const D3DCOLOR ClearColorDx = D3DCOLOR_RGBA((int)(ClearColor.x * ClearColor.w * 255.0f), (int)(ClearColor.y * ClearColor.w * 255.0f), (int)(ClearColor.z * ClearColor.w * 255.0f), (int)(ClearColor.w * 255.0f));
-        DxDevice->Clear(0, 0, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, ClearColorDx, 1.0f, 0);
-
-        if (DxDevice->BeginScene() >= 0)
-        {
-            ImGui::Render();
-            ImGui_ImplDX9_RenderDrawData(ImGui::GetDrawData());
-            DxDevice->EndScene();
-        }
-
-        const HRESULT Result = DxDevice->Present(0, 0, 0, 0);
-
-        // Handle loss of D3D9 device
-        if (Result == D3DERR_DEVICELOST && DxDevice->TestCooperativeLevel() == D3DERR_DEVICENOTRESET)
-        {
-            ResetDeviceD3D();
-        }
-    }
-
-    Gui::Uninitialize();
-
-    return false;
-}
-void Gui::Uninitialize()
-{
-    ImGui_ImplDX9_Shutdown();
-    ImGui_ImplWin32_Shutdown();
-    ImGui::DestroyContext();
-
-    CleanupDeviceD3D();
-    DestroyWindow(Hwnd);
-    UnregisterClassA(Class.lpszClassName, Class.hInstance);
+	return true;
 }
 
-extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
-LRESULT WINAPI Gui::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
+extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND Hwnd, UINT Msg, WPARAM wParam, LPARAM lParam);
+
+long __stdcall WindowProcess(HWND window, UINT message, WPARAM wideParameter, LPARAM longParameter)
 {
-    if (ImGui_ImplWin32_WndProcHandler(hWnd, msg, wParam, lParam))
-    {
-        return true;
-    }
+	if (ImGui_ImplWin32_WndProcHandler(window, message, wideParameter, longParameter))
+		return true;
 
-    switch (msg)
-    {
-        case WM_SIZE:
-        {
-            if (DxDevice && wParam != SIZE_MINIMIZED)
-            {
-                DxPP.BackBufferWidth = LOWORD(lParam);
-                DxPP.BackBufferHeight = HIWORD(lParam);
-                ResetDeviceD3D();
-            }
+	switch (message)
+	{
+		case WM_SIZE:
+		{
+			if (Gui::DxDevice && wideParameter != SIZE_MINIMIZED)
+			{
+				Gui::DxPresentParameters.BackBufferWidth = LOWORD(longParameter);
+				Gui::DxPresentParameters.BackBufferHeight = HIWORD(longParameter);
+				Gui::ResetDevice();
+			}
 
-            return 0;
-        }
-        case WM_SYSCOMMAND:
-        {
-            if ((wParam & 0xfff0) == SC_KEYMENU) // Disable ALT application menu
-            {
-                return 0;
-            }
+			return 0;
+		}
+		case WM_SYSCOMMAND:
+		{
+			if ((wideParameter & 0xfff0) == SC_KEYMENU)
+			{
+				return 0;
+			}
 
-            break;
-        }
-        case WM_DESTROY:
-        {
-            PostQuitMessage(0);
-            return 0;
-        }
-    }
+			break;
+		}
+		case WM_DESTROY:
+		{
+			PostQuitMessage(0);
+			return 0;
+		}
+		case WM_LBUTTONDOWN:
+		{
+			Gui::Position = MAKEPOINTS(longParameter);
+			return 0;
+		}
+		case WM_MOUSEMOVE:
+		{
+			if (wideParameter == MK_LBUTTON)
+			{
+				const POINTS Points = MAKEPOINTS(longParameter);
+				RECT Rect;
 
-    return DefWindowProcA(hWnd, msg, wParam, lParam);
+				GetWindowRect(Gui::Hwnd, &Rect);
+
+				Rect.left += Points.x - Gui::Position.x;
+				Rect.top += Points.y - Gui::Position.y;
+
+				if (Gui::Position.x >= 0 && Gui::Position.x <= Gui::Size.x && Gui::Position.y >= 0 && Gui::Position.y <= 18)
+				{
+					SetWindowPos(Gui::Hwnd, HWND_TOPMOST, Rect.left, Rect.top, 0, 0, SWP_SHOWWINDOW | SWP_NOSIZE | SWP_NOZORDER);
+				}
+			}
+
+			return 0;
+		}
+	}
+
+	return DefWindowProcA(window, message, wideParameter, longParameter);
 }
-bool Gui::CreateDeviceD3D(HWND hWnd)
+
+void Gui::CreateWnd(const char* windowName)
 {
-    if ((DxD3D = Direct3DCreate9(D3D_SDK_VERSION)) == NULL)
-    {
-        return false;
-    }
+	Class = { sizeof(WNDCLASSEX), CS_CLASSDC, reinterpret_cast<WNDPROC>(WindowProcess), 0, 0, GetModuleHandleA(0), 0, 0, 0, 0, "ClientWnd", 0 };
 
-    // Create the D3DDevice
-    RtlZeroMemory(&DxPP, sizeof(DxPP));
-    DxPP.Windowed = TRUE;
-    DxPP.SwapEffect = D3DSWAPEFFECT_DISCARD;
-    DxPP.BackBufferFormat = D3DFMT_UNKNOWN; // Need to use an explicit format with alpha if needing per-pixel alpha composition.
-    DxPP.EnableAutoDepthStencil = TRUE;
-    DxPP.AutoDepthStencilFormat = D3DFMT_D16;
-    DxPP.PresentationInterval = D3DPRESENT_INTERVAL_ONE;           // Present with vsync
-    //g_d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;   // Present without vsync, maximum unthrottled framerate
-    if (DxD3D->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, hWnd, D3DCREATE_HARDWARE_VERTEXPROCESSING, &DxPP, &DxDevice) < 0)
-    {
-        return false;
-    }
+	RegisterClassExA(&Class);
 
-    return true;
+	Hwnd = CreateWindowExA(0, "ClientWnd", windowName, WS_POPUP, Position.x, Position.y, Size.x, Size.y, 0, 0, Class.hInstance, 0);
+
+	ShowWindow(Hwnd, SW_SHOWDEFAULT);
+	UpdateWindow(Hwnd);
 }
-void Gui::CleanupDeviceD3D()
+
+void Gui::ClearWnd()
 {
-    if (DxDevice) { DxDevice->Release(); DxDevice = nullptr; }
-    if (DxD3D) { DxD3D->Release(); DxD3D = nullptr; }
+	DestroyWindow(Hwnd);
+	UnregisterClassA(Class.lpszClassName, Class.hInstance);
 }
-void Gui::ResetDeviceD3D()
+
+bool Gui::CreateDevice()
 {
-    ImGui_ImplDX9_InvalidateDeviceObjects();
+	DxD3D = Direct3DCreate9(D3D_SDK_VERSION);
 
-    const HRESULT Result = DxDevice->Reset(&DxPP);
-    if (Result == D3DERR_INVALIDCALL)
-    {
-        IM_ASSERT(0);
-    }
+	if (!DxD3D)
+	{
+		return false;
+	}
 
-    ImGui_ImplDX9_CreateDeviceObjects();
+	RtlZeroMemory(&DxPresentParameters, sizeof(DxPresentParameters));
+
+	DxPresentParameters.Windowed = true;
+	DxPresentParameters.SwapEffect = D3DSWAPEFFECT_DISCARD;
+	DxPresentParameters.BackBufferFormat = D3DFMT_UNKNOWN;
+	DxPresentParameters.EnableAutoDepthStencil = true;
+	DxPresentParameters.AutoDepthStencilFormat = D3DFMT_D16;
+	DxPresentParameters.PresentationInterval = D3DPRESENT_INTERVAL_ONE;
+
+	const bool Success = DxD3D->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, Hwnd, D3DCREATE_HARDWARE_VERTEXPROCESSING, &DxPresentParameters, &DxDevice) < 0;
+	return Success;
+}
+
+void Gui::ResetDevice()
+{
+	ImGui_ImplDX9_InvalidateDeviceObjects();
+
+	const HRESULT Result = DxDevice->Reset(&DxPresentParameters);
+
+	if (Result == D3DERR_INVALIDCALL)
+	{
+		IM_ASSERT(0);
+	}
+
+	ImGui_ImplDX9_CreateDeviceObjects();
+}
+
+void Gui::ClearDevice()
+{
+	if (DxDevice)
+	{
+		DxDevice->Release();
+		DxDevice = nullptr;
+	}
+
+	if (DxD3D)
+	{
+		DxD3D->Release();
+		DxD3D = nullptr;
+	}
+}
+
+void Gui::CreateImGui()
+{
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
+	ImGuiIO& Io = ImGui::GetIO();
+
+	Io.IniFilename = nullptr;
+
+	ImGui::StyleColorsClassic();
+
+	ImGui_ImplWin32_Init(Hwnd);
+	ImGui_ImplDX9_Init(DxDevice);
+}
+
+void Gui::ClearImGui()
+{
+	ImGui_ImplDX9_Shutdown();
+	ImGui_ImplWin32_Shutdown();
+	ImGui::DestroyContext();
+}
+
+void Gui::BeginRender()
+{
+	MSG Msg;
+	while (PeekMessageA(&Msg, 0, 0, 0, PM_REMOVE))
+	{
+		TranslateMessage(&Msg);
+		DispatchMessageA(&Msg);
+
+		if (Msg.message == WM_QUIT)
+		{
+			ShouldRun = false;
+			return;
+		}
+	}
+
+	// Start the Dear ImGui frame
+	ImGui_ImplDX9_NewFrame();
+	ImGui_ImplWin32_NewFrame();
+	ImGui::NewFrame();
+}
+
+void Gui::EndRender()
+{
+	ImGui::EndFrame();
+
+	DxDevice->SetRenderState(D3DRS_ZENABLE, false);
+	DxDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, false);
+	DxDevice->SetRenderState(D3DRS_SCISSORTESTENABLE, false);
+
+	DxDevice->Clear(0, 0, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, D3DCOLOR_RGBA(0, 0, 0, 255), 1.f, 0);
+
+	if (DxDevice->BeginScene() >= 0)
+	{
+		ImGui::Render();
+		ImGui_ImplDX9_RenderDrawData(ImGui::GetDrawData());
+		DxDevice->EndScene();
+	}
+
+	const HRESULT Result = DxDevice->Present(0, 0, 0, 0);
+
+	// Handle resetting of the DX device
+	if (Result == D3DERR_DEVICELOST && DxDevice->TestCooperativeLevel() == D3DERR_DEVICENOTRESET)
+	{
+		ResetDevice();
+	}
 }

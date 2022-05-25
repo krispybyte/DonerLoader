@@ -13,10 +13,10 @@ int main()
 
 	if (Gui::Run())
 	{
-		// Erase streamed module on shutdown event
+		// Clean data on ImGui exit
 		Module::Data.erase(Module::Data.begin(), Module::Data.end());
 		Module::Data.shrink_to_fit();
-		ExitProcess(31);
+		ExitProcess(EXIT_SUCCESS);
 	}
 
 	return std::getchar();

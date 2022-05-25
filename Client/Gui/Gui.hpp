@@ -1,32 +1,39 @@
 #pragma once
 #include "../Network/Network.hpp"
 #include <imgui.h>
-#include <backends/imgui_impl_win32.h>
-#include <backends/imgui_impl_dx9.h>
 #include <d3d9.h>
 
 namespace Gui
 {
-	const ImVec2 ScreenSize = { (float)GetSystemMetrics(SM_CXSCREEN), (float)GetSystemMetrics(SM_CYSCREEN) };
-	const ImVec2 AppSize = { 450.f, 380.f };
+	inline bool ShouldRun = true;
+
+	// Screen data
+	inline ImVec2 ScreenSize = { static_cast<float>(GetSystemMetrics(SM_CXSCREEN)), static_cast<float>(GetSystemMetrics(SM_CYSCREEN)) };
 
 	// Window data
-	inline WNDCLASSEX Class;
 	inline HWND Hwnd;
-	inline bool FinishLoop = false;
+	inline WNDCLASSEX Class;
+	inline ImVec2 Size = { 220, 105 };
+	inline POINTS Position = { ScreenSize.x / 2.f - Size.x / 2.f, ScreenSize.y / 2.f - Size.y / 2.f };
 
 	// Dx Data
-	static LPDIRECT3D9 DxD3D;
-	static LPDIRECT3DDEVICE9 DxDevice;
-	static D3DPRESENT_PARAMETERS DxPP;
+	inline PDIRECT3D9 DxD3D;
+	inline LPDIRECT3DDEVICE9 DxDevice;
+	inline D3DPRESENT_PARAMETERS DxPresentParameters;
 
-	// Custom functions
-    void Render();
-    void Uninitialize();
-    bool Run();
+	bool Run();
 
-	void ResetDeviceD3D();
-	LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
-	bool CreateDeviceD3D(HWND hWnd);
-	void CleanupDeviceD3D();
+	void CreateWnd(const char* Name);
+	void ClearWnd();
+
+	bool CreateDevice();
+	void ResetDevice();
+	void ClearDevice();
+
+	void CreateImGui();
+	void ClearImGui();
+
+	void BeginRender();
+	void EndRender();
+	void Render();
 }
