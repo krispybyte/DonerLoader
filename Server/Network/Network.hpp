@@ -29,10 +29,10 @@ namespace Network
 		tcp::socket& Get();
 		asio::ip::address GetIpAddress();
 
-		RSA::PrivateKey ServerPrivateKey;
-		RSA::PublicKey ClientPublicKey;
+		CryptoPP::RSA::PrivateKey ServerPrivateKey;
+		CryptoPP::RSA::PublicKey ClientPublicKey;
 
-		SecByteBlock AesKey;
+		CryptoPP::SecByteBlock AesKey;
 
 		std::vector<ModuleIds> ModuleIdLoadList;
 

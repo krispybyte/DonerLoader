@@ -18,7 +18,7 @@ std::string Utilities::RandomString(const std::size_t Length)
 std::tuple<std::string, std::string> Utilities::EncryptMessage(const std::string& Plain)
 {
     // Generate initialization vector
-    const SecByteBlock AesIv = Crypto::Aes256::GenerateIv();
+    const CryptoPP::SecByteBlock AesIv = Crypto::Aes256::GenerateIv();
     const std::string AesIvStr = std::string(reinterpret_cast<const char*>(AesIv.data()), AesIv.size());
 
     return
@@ -31,7 +31,7 @@ std::tuple<std::string, std::string> Utilities::EncryptMessage(const std::string
 std::string Utilities::EncryptMessage(const std::string& Plain, const std::string& AesIvStr)
 {
     const std::string DecodedAesIvStr = Crypto::Hex::Decode(AesIvStr);
-    const SecByteBlock AesIv = SecByteBlock((const byte*)DecodedAesIvStr.data(), DecodedAesIvStr.size());
+    const CryptoPP::SecByteBlock AesIv = CryptoPP::SecByteBlock((const CryptoPP::byte*)DecodedAesIvStr.data(), DecodedAesIvStr.size());
 
     return Crypto::Hex::Encode(Crypto::Aes256::Encrypt(Plain, Network::AesKey, AesIv));
 }
@@ -42,7 +42,7 @@ std::string Utilities::DecryptMessage(const std::string& Cipher, const std::stri
     const std::string DecodedAesIvStr = Crypto::Hex::Decode(EncodedIv);
 
     // Convert iv into a SecByteBlock from string
-    const SecByteBlock AesIv = SecByteBlock(reinterpret_cast<const byte*>(DecodedAesIvStr.data()), DecodedAesIvStr.size());
+    const CryptoPP::SecByteBlock AesIv = CryptoPP::SecByteBlock(reinterpret_cast<const CryptoPP::byte*>(DecodedAesIvStr.data()), DecodedAesIvStr.size());
 
     // Decode cipher
     const std::string DecodedCipher = Crypto::Hex::Decode(Cipher);
@@ -51,10 +51,10 @@ std::string Utilities::DecryptMessage(const std::string& Cipher, const std::stri
     return Crypto::Aes256::Decrypt(DecodedCipher, Network::AesKey, AesIv);
 }
 
-std::string Utilities::GetPublicKeyStr(RSA::PrivateKey& PrivateKey)
+std::string Utilities::GetPublicKeyStr(CryptoPP::RSA::PrivateKey& PrivateKey)
 {
     // Generate key based on private key passed.
-    const RSA::PublicKey ClientPublicKey = Crypto::Rsa::GeneratePublic(PrivateKey);
+    const CryptoPP::RSA::PublicKey ClientPublicKey = Crypto::Rsa::GeneratePublic(PrivateKey);
     // Return key in PEM format as a string.
     return Crypto::Hex::Encode(Crypto::PEM::ExportKey(ClientPublicKey));
 }

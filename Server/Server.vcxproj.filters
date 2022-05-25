@@ -53,28 +53,28 @@
     <ClInclude Include="Network\Network.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Cryptography\AES256.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Cryptography\Base64.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Cryptography\PEM.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Cryptography\RSA.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Utilities\Utilities.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Network\SocketHandler.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Modules\Modules.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Cryptography\RSA.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Cryptography\PEM.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="Cryptography\Hex.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Modules\Modules.hpp">
+    <ClInclude Include="Cryptography\Base64.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Cryptography\AES256.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

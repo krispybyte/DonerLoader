@@ -6,7 +6,7 @@
 #include <iostream>
 
 // Asio
-#define _WIN32_WINNT 0xA00
+#define _WIN32_WINNT 0x0A00
 #define ASIO_STANDALONE	1
 #include <asio/asio/include/asio.hpp>
 using asio::ip::tcp;
@@ -24,7 +24,7 @@ using namespace nlohmann;
 #include <cryptopp/hex.h>
 #include <cryptopp/modes.h>
 #include <cryptopp/osrng.h>
-using namespace CryptoPP;
+//using namespace CryptoPP;
 
 namespace Network
 {

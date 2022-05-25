@@ -1,13 +1,13 @@
 #include "AES256.hpp"
 
-SecByteBlock Crypto::Aes256::GenerateKey(std::size_t Size)
+CryptoPP::SecByteBlock Crypto::Aes256::GenerateKey(std::size_t Size)
 {
     SecByteBlock Key(Size);
     Rng.GenerateBlock(Key, Key.size());
     return Key;
 }
 
-SecByteBlock Crypto::Aes256::GenerateIv(std::size_t Size)
+CryptoPP::SecByteBlock Crypto::Aes256::GenerateIv(std::size_t Size)
 {
     SecByteBlock Iv(Size);
     Rng.GenerateBlock(Iv, Iv.size());

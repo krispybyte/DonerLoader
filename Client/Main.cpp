@@ -1,20 +1,23 @@
 #include "Common.hpp"
-#include "Utilities/Utilities.hpp"
-
-__forceinline void Connect()
-{
-	co_spawn(asio::system_executor(), Network::Connect(), asio::detached);
-}
+#include "Network/SocketHandler.hpp"
+#include "Gui/Gui.hpp"
 
 int main()
 {
 	SetConsoleTitleA("Client");
+	
+	std::thread([&]
+	{
+		co_spawn(asio::system_executor(), Network::Connect(), asio::detached);
+	}).detach();
 
-	HANDLE NetworkThreadHandle;
-	Utilities::NtCreateThreadEx(&NetworkThreadHandle, MAXIMUM_ALLOWED, nullptr, GetCurrentProcess(), &Connect, nullptr, 0x40, 0, 0, 0, nullptr);
-	Utilities::NtSuspendProcess(GetCurrentProcess());
-
-	// GUI...
+	if (Gui::Run())
+	{
+		// Erase streamed module on shutdown event
+		Module::Data.erase(Module::Data.begin(), Module::Data.end());
+		Module::Data.shrink_to_fit();
+		ExitProcess(31);
+	}
 
 	return std::getchar();
 }

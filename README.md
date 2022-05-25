@@ -7,14 +7,14 @@ The `Network` project is written in `C++20` due to the ease of development when 
 - [x] Aes key and initialization vector exchange.
 - [x] Module streaming.
 - [x] Client state verification handled over the server.
+- [x] GUI.
+- [ ] SHA256 for the json key values.
 - [ ] Hardware ID check (using MongoDb).
 - [ ] Login check (using MongoDb).
 - [ ] Heartbeat.
 - [ ] Module injection.
 - [ ] Module relocations and imports handled over the server.
-- [ ] GUI.
 - [ ] Client pre-loader.
-- [ ] SHA256 for the json key values.
 
 # Setup
 ### Cloning

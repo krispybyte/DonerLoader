@@ -25,7 +25,7 @@ asio::awaitable<void> Network::Handle::Idle(tcp::socket& Socket)
 	}
 }
 
-asio::awaitable<void> Network::Handle::Initialization(tcp::socket& Socket, RSA::PrivateKey& PrivateKey)
+asio::awaitable<void> Network::Handle::Initialization(tcp::socket& Socket, CryptoPP::RSA::PrivateKey& PrivateKey)
 {
 	// Write
 	{
@@ -56,13 +56,14 @@ asio::awaitable<void> Network::Handle::Initialization(tcp::socket& Socket, RSA::
 		std::string AesKey = Crypto::Hex::Decode(Json["AesKey"]);
 		AesKey = Crypto::Rsa::Decrypt(AesKey, PrivateKey);
 
-		Network::AesKey = SecByteBlock(reinterpret_cast<const byte*>(AesKey.data()), AesKey.size());
+		Network::AesKey = CryptoPP::SecByteBlock(reinterpret_cast<const CryptoPP::byte*>(AesKey.data()), AesKey.size());
 
 		std::cout << "[+] Exchanged keys." << '\n';
 	}
 
-	// Set state to the next one
-	Network::ClientState = ClientStates::LoginState;
+	// Set state to idle so we can
+	// wait until the user logs in
+	Network::ClientState = ClientStates::IdleState;
 }
 
 asio::awaitable<void> Network::Handle::Login(tcp::socket& Socket)
@@ -96,7 +97,7 @@ asio::awaitable<void> Network::Handle::Login(tcp::socket& Socket)
 	}
 
 	// Set state to the next one
-	Network::ClientState = ClientStates::ModuleState;
+	Network::ClientState = ClientStates::IdleState;
 }
 
 bool Opened = false;

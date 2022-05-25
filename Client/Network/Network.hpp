@@ -19,8 +19,8 @@ namespace Network
 
 	inline Network::ClientStates ClientState = Network::ClientStates::InitializeState;
 
-	inline RSA::PublicKey ServerPublicKey;
-	inline SecByteBlock AesKey;
+	inline CryptoPP::RSA::PublicKey ServerPublicKey;
+	inline CryptoPP::SecByteBlock AesKey;
 
 	asio::awaitable<void> SocketHandler(tcp::socket Socket);
 	asio::awaitable<void> Connect();

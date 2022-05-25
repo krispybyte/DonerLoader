@@ -1,13 +1,13 @@
 #include "RSA.hpp"
 
-RSA::PrivateKey Crypto::Rsa::GeneratePrivate(unsigned int Size)
+CryptoPP::RSA::PrivateKey Crypto::Rsa::GeneratePrivate(unsigned int Size)
 {
 	RSA::PrivateKey PrivateKey;
 	PrivateKey.GenerateRandomWithKeySize(Rng, Size);
 	return PrivateKey;
 }
 
-RSA::PublicKey Crypto::Rsa::GeneratePublic(RSA::PrivateKey& PrivateKey)
+CryptoPP::RSA::PublicKey Crypto::Rsa::GeneratePublic(RSA::PrivateKey& PrivateKey)
 {
 	return RSA::PublicKey(PrivateKey);
 }

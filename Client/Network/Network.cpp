@@ -6,7 +6,7 @@ asio::awaitable<void> Network::SocketHandler(tcp::socket Socket)
 	std::cout << "[+] Connected." << '\n';
 
 	// Cryptography
-	RSA::PrivateKey ClientPrivateKey = Crypto::Rsa::GeneratePrivate();
+	CryptoPP::RSA::PrivateKey ClientPrivateKey = Crypto::Rsa::GeneratePrivate();
 
 	while (true)
 	{
