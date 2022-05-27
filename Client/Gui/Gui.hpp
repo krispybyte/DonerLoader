@@ -21,7 +21,7 @@ namespace Gui
 	inline LPDIRECT3DDEVICE9 DxDevice;
 	inline D3DPRESENT_PARAMETERS DxPresentParameters;
 
-	bool Run();
+	void Run();
 
 	void CreateWnd(const char* Name);
 	void ClearWnd();

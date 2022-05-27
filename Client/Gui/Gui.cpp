@@ -76,7 +76,7 @@ void Gui::Render()
 	}
 }
 
-bool Gui::Run()
+void Gui::Run()
 {
 	// Create
 	CreateWnd("Client");
@@ -95,8 +95,6 @@ bool Gui::Run()
 	ClearImGui();
 	ClearDevice();
 	ClearWnd();
-
-	return true;
 }
 
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND Hwnd, UINT Msg, WPARAM wParam, LPARAM lParam);
