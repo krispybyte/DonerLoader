@@ -24,7 +24,6 @@ using namespace nlohmann;
 #include <cryptopp/hex.h>
 #include <cryptopp/modes.h>
 #include <cryptopp/osrng.h>
-//using namespace CryptoPP;
 
 namespace Network
 {

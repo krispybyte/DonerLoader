@@ -186,6 +186,8 @@
     <ClInclude Include="Cryptography\Hex.hpp" />
     <ClInclude Include="Cryptography\PEM.hpp" />
     <ClInclude Include="Cryptography\RSA.hpp" />
+    <ClInclude Include="Gui\Fonts\Fonts.hpp" />
+    <ClInclude Include="Gui\Fonts\SegoeUi.hpp" />
     <ClInclude Include="Gui\Gui.hpp" />
     <ClInclude Include="Gui\imgui\backends\imgui_impl_dx9.h" />
     <ClInclude Include="Gui\imgui\backends\imgui_impl_win32.h" />

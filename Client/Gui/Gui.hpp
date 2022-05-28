@@ -13,8 +13,8 @@ namespace Gui
 	// Window data
 	inline HWND Hwnd;
 	inline WNDCLASSEX Class;
-	inline ImVec2 Size = { 220, 105 };
-	inline POINTS Position = { ScreenSize.x / 2.f - Size.x / 2.f, ScreenSize.y / 2.f - Size.y / 2.f };
+	inline ImVec2 Size = { 560, 385 };
+	inline ImVec2 Position = { ScreenSize.x / 2.f - Size.x / 2.f, ScreenSize.y / 2.f - Size.y / 2.f };
 
 	// Dx Data
 	inline PDIRECT3D9 DxD3D;

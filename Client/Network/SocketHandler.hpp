@@ -15,5 +15,5 @@ namespace Network::Handle
 namespace Module
 {
 	inline int ChunkIndex = 0;
-	inline std::vector<uint8_t> Data;
+	inline std::vector<std::uint8_t> Data;
 }

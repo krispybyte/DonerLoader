@@ -1,37 +1,71 @@
 #include "Gui.hpp"
+#include "Fonts/Fonts.hpp"
 #include <backends/imgui_impl_win32.h>
 #include <backends/imgui_impl_dx9.h>
 
 bool LoggedIn = false;
 bool Streamed = false;
 
+bool RememberMe = false;
+
+char Username[17]; // Maximum of 16 characters
+char Password[33]; // Maximum of 32 characters
+
+int SelectedModule = 0;
+
 void Gui::Render()
 {
 	ImGui::SetNextWindowPos({ 0, 0 });
 	ImGui::SetNextWindowSize(Size);
 
-	ImGui::Begin("Client", &ShouldRun, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoSavedSettings);
+	ImGui::Begin("Client", &ShouldRun, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoSavedSettings);
 	{
+		ImGui::GetWindowDrawList()->AddRectFilled({ 0, 0 }, { Size.x, Size.y }, ImGui::GetColorU32(ImGuiCol_TitleBg));
+
 		switch (Network::ClientState)
 		{
 			case Network::ClientStates::IdleState:
 			{
 				if (!LoggedIn)
 				{
-					if (ImGui::Button("Login", { 80, 32 }))
+					ImGui::PushItemWidth(160);
+
+					ImGui::SetCursorPos({ Size.x / 2 - 160 / 2, Size.y / 3 });
+					ImGui::InputText("Username", Username, IM_ARRAYSIZE(Username));
+
+					ImGui::SetCursorPos({ Size.x / 2 - 160 / 2, Size.y / 2.4f });
+					ImGui::InputText("Password", Password, IM_ARRAYSIZE(Password), ImGuiInputTextFlags_Password);
+
+					ImGui::SetCursorPos({ Size.x / 2 - 160 / 2, Size.y / 2.0f });
+					ImGui::Checkbox("Remember Me", &RememberMe);
+
+					ImGui::SetCursorPos({ Size.x / 2 - 160 / 2, Size.y / 1.7f });
+					if (ImGui::Button("Login", { 160, 46 }))
 					{
 						Network::ClientState = Network::ClientStates::LoginState;
 						LoggedIn = true;
 					}
 
+					ImGui::PopItemWidth();
 					break;
 				}
 
-				ImGui::Text("Logged in, welcome!");
-
 				if (!Streamed)
 				{
-					if (ImGui::Button("Stream", { 80, 32 }))
+					static const std::string WelcomeMessage = "Logged in, welcome " + std::string(Username) + "!";
+					ImGui::SetCursorPos({ Size.x / 2 - ImGui::CalcTextSize(WelcomeMessage.c_str()).x / 2, Size.y / 5 });
+					ImGui::Text(WelcomeMessage.c_str());
+
+					ImGui::SetCursorPos({ Size.x / 2 - ImGui::CalcTextSize("Please choose a module to load").x / 2, Size.y / 4 });
+					ImGui::Text("Please choose a module to load");
+
+					static const char* AvailableModules[] { "CS:GO", "Rust", "Escape from Tarkov" };
+					ImGui::SetCursorPos({ Size.x / 2 - 160 / 2, Size.y / 3.2f });
+					ImGui::SetNextItemWidth(160);
+					ImGui::ListBox("##Modules", &SelectedModule, AvailableModules, IM_ARRAYSIZE(AvailableModules), 4);
+
+					ImGui::SetCursorPos({ Size.x / 2 - 160 / 2, Size.y / 1.7f });
+					if (ImGui::Button("Load", { 160, 46 }))
 					{
 						Network::ClientState = Network::ClientStates::ModuleState;
 						Streamed = true;
@@ -40,9 +74,11 @@ void Gui::Render()
 					break;
 				}
 
-				ImGui::Text("Successfully streamed!");
+				ImGui::SetCursorPos({ Size.x / 2 - ImGui::CalcTextSize("Successfully loaded!").x / 2, Size.y / 2.4f });
+				ImGui::Text("Successfully loaded!");
 
-				if (ImGui::Button("Exit", { 80, 32 }))
+				ImGui::SetCursorPos({ Size.x / 2 - 160 / 2, Size.y / 2 });
+				if (ImGui::Button("Exit", { 160, 46 }))
 				{
 					ShouldRun = false;
 				}
@@ -51,17 +87,20 @@ void Gui::Render()
 			}
 			case Network::ClientStates::InitializeState:
 			{
-				ImGui::Text("Exchanging keys...");
+				ImGui::SetCursorPos({ Size.x / 2 - ImGui::CalcTextSize("Initializing resources...").x / 2, Size.y / 2.4f });
+				ImGui::Text("Initializing resources...");
 				break;
 			}
 			case Network::ClientStates::LoginState:
 			{
-				ImGui::Text("Logging you in...");
+				ImGui::SetCursorPos({ Size.x / 2 - ImGui::CalcTextSize("Logging in...").x / 2, Size.y / 2.4f });
+				ImGui::Text("Logging in...");
 				break;
 			}
 			case Network::ClientStates::ModuleState:
 			{
-				ImGui::Text("Streaming module...");
+				ImGui::SetCursorPos({ Size.x / 2 - ImGui::CalcTextSize("Loading module...").x / 2, Size.y / 2.4f });
+				ImGui::Text("Loading module...");
 				break;
 			}
 			default:
@@ -133,7 +172,8 @@ long __stdcall WindowProcess(HWND window, UINT message, WPARAM wideParameter, LP
 		}
 		case WM_LBUTTONDOWN:
 		{
-			Gui::Position = MAKEPOINTS(longParameter);
+			const POINTS Points = MAKEPOINTS(longParameter);
+			Gui::Position = { (float)Points.x, (float)Points.y };
 			return 0;
 		}
 		case WM_MOUSEMOVE:
@@ -148,7 +188,7 @@ long __stdcall WindowProcess(HWND window, UINT message, WPARAM wideParameter, LP
 				Rect.left += Points.x - Gui::Position.x;
 				Rect.top += Points.y - Gui::Position.y;
 
-				if (Gui::Position.x >= 0 && Gui::Position.x <= Gui::Size.x && Gui::Position.y >= 0 && Gui::Position.y <= 18)
+				if (Gui::Position.x >= 0 && Gui::Position.x <= Gui::Size.x && Gui::Position.y >= 0 && Gui::Position.y <= 20)
 				{
 					SetWindowPos(Gui::Hwnd, HWND_TOPMOST, Rect.left, Rect.top, 0, 0, SWP_SHOWWINDOW | SWP_NOSIZE | SWP_NOZORDER);
 				}
@@ -236,9 +276,17 @@ void Gui::CreateImGui()
 	ImGui::CreateContext();
 	ImGuiIO& Io = ImGui::GetIO();
 
+	// Disalbe .ini file generation
 	Io.IniFilename = nullptr;
 
-	ImGui::StyleColorsClassic();
+	// Setup ImGui style
+	ImGui::StyleColorsDark();
+
+	// Setup custom fonts
+	if (!Fonts::Setup())
+	{
+		ShouldRun = false;
+	}
 
 	ImGui_ImplWin32_Init(Hwnd);
 	ImGui_ImplDX9_Init(DxDevice);

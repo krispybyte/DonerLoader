@@ -90,7 +90,9 @@ Disconnect:
 	// we'll remove the ip address from the list
 	const auto IpAddressPosition = std::find(ConnectionList.begin(), ConnectionList.end(), IpAddress);
 	if (IpAddressPosition != ConnectionList.end())
+	{
 		ConnectionList.erase(IpAddressPosition);
+	}
 }
 
 asio::awaitable<void> Network::ConnectionHandler(tcp::acceptor& TcpAcceptor)
