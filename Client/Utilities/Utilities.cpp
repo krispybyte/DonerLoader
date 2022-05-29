@@ -55,8 +55,17 @@ std::string Utilities::GetPublicKeyStr(CryptoPP::RSA::PrivateKey& PrivateKey)
 {
     // Generate key based on private key passed.
     const CryptoPP::RSA::PublicKey ClientPublicKey = Crypto::Rsa::GeneratePublic(PrivateKey);
+
     // Return key in PEM format as a string.
     return Crypto::Hex::Encode(Crypto::PEM::ExportKey(ClientPublicKey));
+}
+
+std::string Utilities::GenerateIv()
+{
+    // Generate initialization vector
+    const CryptoPP::SecByteBlock AesIv = Crypto::Aes256::GenerateIv();
+    const std::string AesIvStr = std::string(reinterpret_cast<const char*>(AesIv.data()), AesIv.size());
+    return Crypto::Hex::Encode(AesIvStr);
 }
 
 void Utilities::KillOwnProcess()

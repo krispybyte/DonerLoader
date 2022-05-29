@@ -17,6 +17,8 @@ namespace Utilities
     // Generates the public key based on the private key
     // fed and returns it as a string in the PEM format.
     std::string GetPublicKeyStr(CryptoPP::RSA::PrivateKey& PrivateKey);
+    // Generates custom initialization vector.
+    std::string GenerateIv();
     // Close the process.
     inline void KillOwnProcess();
 }

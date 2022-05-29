@@ -39,6 +39,7 @@ namespace Network
 		bool HasInitialized = false;
 		bool HasLoggedIn = false;
 		bool HasStreamedModule = false;
+		int LoginAttempts = 0;
 	};
 
 	asio::awaitable<void> SocketHandler(tcp::socket TcpSocket);

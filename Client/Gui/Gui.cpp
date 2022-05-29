@@ -3,16 +3,6 @@
 #include <backends/imgui_impl_win32.h>
 #include <backends/imgui_impl_dx9.h>
 
-bool LoggedIn = false;
-bool Streamed = false;
-
-bool RememberMe = false;
-
-char Username[17]; // Maximum of 16 characters
-char Password[33]; // Maximum of 32 characters
-
-int SelectedModule = 0;
-
 void Gui::Render()
 {
 	ImGui::SetNextWindowPos({ 0, 0 });
@@ -26,7 +16,7 @@ void Gui::Render()
 		{
 			case Network::ClientStates::IdleState:
 			{
-				if (!LoggedIn)
+				if (!Network::SuccessfulLogin)
 				{
 					ImGui::PushItemWidth(160);
 
@@ -36,14 +26,13 @@ void Gui::Render()
 					ImGui::SetCursorPos({ Size.x / 2 - 160 / 2, Size.y / 2.4f });
 					ImGui::InputText("Password", Password, IM_ARRAYSIZE(Password), ImGuiInputTextFlags_Password);
 
-					ImGui::SetCursorPos({ Size.x / 2 - 160 / 2, Size.y / 2.0f });
+					ImGui::SetCursorPos({ Size.x / 2 - 160 / 2, Size.y / 2 });
 					ImGui::Checkbox("Remember Me", &RememberMe);
 
 					ImGui::SetCursorPos({ Size.x / 2 - 160 / 2, Size.y / 1.7f });
 					if (ImGui::Button("Login", { 160, 46 }))
 					{
 						Network::ClientState = Network::ClientStates::LoginState;
-						LoggedIn = true;
 					}
 
 					ImGui::PopItemWidth();

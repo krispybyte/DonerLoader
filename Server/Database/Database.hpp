@@ -7,7 +7,12 @@
 
 namespace Database
 {
+	inline mongocxx::client Connection;
+	inline mongocxx::database Db;
+	inline mongocxx::collection Users;
+
 	mongocxx::client Connect();
-	mongocxx::database GetDatabase(const mongocxx::client& Connection, const std::string_view& DatabaseName);
+	mongocxx::database GetDatabase(const std::string_view& DatabaseName);
 	mongocxx::collection GetCollection(const mongocxx::database& Database, const std::string_view& CollectionName);
+	bool VerifyLogin(const std::string& Username, const std::string& Password);
 }

@@ -1,6 +1,9 @@
 ﻿#pragma once
 #include <Shared.hpp>
 
+// Database
+#include "Database/Database.hpp"
+
 // Network
 #include "Network/Network.hpp"
 

@@ -5,7 +5,17 @@
 
 namespace Gui
 {
+	// Loader ui data
 	inline bool ShouldRun = true;
+
+	inline bool Streamed = false;
+
+	inline char Username[17]; // Maximum of 16 characters
+	inline char Password[33]; // Maximum of 32 characters
+
+	inline bool RememberMe = false;
+
+	inline int SelectedModule = 0;
 
 	// Screen data
 	inline ImVec2 ScreenSize = { static_cast<float>(GetSystemMetrics(SM_CXSCREEN)), static_cast<float>(GetSystemMetrics(SM_CYSCREEN)) };

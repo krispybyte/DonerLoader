@@ -1,6 +1,7 @@
 #include "SocketHandler.hpp"
 #include "../Utilities/Utilities.hpp"
 #include "../Modules/Modules.hpp"
+#include "../Database/Database.hpp"
 
 asio::awaitable<void> Network::Handle::Idle(Network::Socket& Socket)
 {
@@ -60,30 +61,39 @@ asio::awaitable<void> Network::Handle::Login(Network::Socket& Socket, json& Read
 	}
 
 	// Read
-	{
-		const std::string DecryptedMessage = Utilities::DecryptMessage(ReadJson["Data"], ReadJson["AesIv"], Socket.AesKey);
-		std::cout << "[+] Decrypted login message: " << DecryptedMessage.c_str() << '\n';
-	}
+	const std::string DecryptedUsername = Utilities::DecryptMessage(ReadJson["Username"], ReadJson["AesIv"], Socket.AesKey);
+	const std::string DecryptedPassword = Utilities::DecryptMessage(ReadJson["Password"], ReadJson["AesIv"], Socket.AesKey);
+	std::cout << "[+] Username: " << DecryptedUsername.c_str() << '\n';
+	std::cout << "[+] Password: " << DecryptedPassword.c_str() << '\n';
 
 	// Write
 	{
-		const auto EncryptionData = Utilities::EncryptMessage("Hello client!", Socket.AesKey);
-
-		const std::string EncryptedMessage = std::get<0>(EncryptionData);
-		const std::string AesIv = std::get<1>(EncryptionData);
+		const bool SuccessfulLogin = Database::VerifyLogin(DecryptedUsername, DecryptedPassword);
 
 		const json Json =
 		{
-			{ "AesIv", AesIv },
-			{ "Data", EncryptedMessage }
+			{ "Success", SuccessfulLogin }
 		};
+
+		if (SuccessfulLogin)
+		{
+			// Verify user has logged in
+			Socket.HasLoggedIn = true;
+		}
+		else
+		{
+			Socket.LoginAttempts++;
+		}
+
+		if (Socket.LoginAttempts == 4)
+		{
+			Socket.Get().close();
+			co_return;
+		}
 
 		const std::string WriteData = Json.dump() + '\0';
 		co_await Socket.Get().async_write_some(asio::buffer(WriteData, WriteData.size()), asio::use_awaitable);
 	}
-
-	// Verify user has logged in
-	Socket.HasLoggedIn = true;
 }
 
 asio::awaitable<void> Network::Handle::Module(Network::Socket& Socket, json& ReadJson)

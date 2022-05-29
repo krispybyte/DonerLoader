@@ -4,6 +4,7 @@
 #include "../Cryptography/PEM.hpp"
 #include "../Cryptography/Base64.hpp"
 #include "../Utilities/Utilities.hpp"
+#include "../Gui/Gui.hpp"
 #include <fstream>
 
 asio::awaitable<void> Network::Handle::Idle(tcp::socket& Socket)
@@ -70,20 +71,31 @@ asio::awaitable<void> Network::Handle::Login(tcp::socket& Socket)
 {
 	// Write
 	{
-		const auto EncryptionData = Utilities::EncryptMessage("Hello server!");
+		const std::string AesIv = Utilities::GenerateIv();
 
-		const std::string EncryptedMessage = std::get<0>(EncryptionData);
-		const std::string AesIv = std::get<1>(EncryptionData);
+		const std::string EncryptedUsername = Utilities::EncryptMessage(Gui::Username, AesIv);
+		const std::string EncryptedPassword = Utilities::EncryptMessage(Gui::Password, AesIv);
 		
 		const json Json =
 		{
 			{ "Id", SocketIds::Login },
 			{ "AesIv", AesIv },
-			{ "Data", EncryptedMessage }
+			{ "Username", EncryptedUsername },
+			{ "Password", EncryptedPassword }
 		};
 
 		const std::string WriteData = Json.dump() + '\0';
 		co_await Socket.async_write_some(asio::buffer(WriteData, WriteData.size()), asio::use_awaitable);
+
+		LoginAttempts++;
+
+		if (LoginAttempts == 4)
+		{
+			MessageBoxA(nullptr, "Too many login attempts have been made.", "Error (335)", MB_ICONERROR | MB_OK);
+			Gui::ShouldRun = false;
+			Socket.close();
+			co_return;
+		}
 	}
 
 	// Read
@@ -92,8 +104,17 @@ asio::awaitable<void> Network::Handle::Login(tcp::socket& Socket)
 
 		const json Json = json::parse(reinterpret_cast<const char*>(ReadBuffer.data()));
 
-		const std::string DecryptedMessage = Utilities::DecryptMessage(Json["Data"], Json["AesIv"]);
-		std::cout << "[+] Decrypted login message: " << DecryptedMessage.c_str() << '\n';
+		SuccessfulLogin = Json["Success"];
+
+		if (SuccessfulLogin)
+		{
+			std::cout << "[+] Successfully logged in!" << '\n';
+		}
+		else
+		{
+			std::cout << "[-] Failed logging in!" << '\n';
+			MessageBoxA(nullptr, "Wrong username or password.", "Error (5)", MB_ICONERROR | MB_OK);
+		}
 	}
 
 	// Set state to the next one

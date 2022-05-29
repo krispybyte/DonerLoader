@@ -22,6 +22,9 @@ namespace Network
 	inline CryptoPP::RSA::PublicKey ServerPublicKey;
 	inline CryptoPP::SecByteBlock AesKey;
 
+	inline bool SuccessfulLogin = false;
+	inline std::uint8_t LoginAttempts = 0;
+
 	asio::awaitable<void> SocketHandler(tcp::socket Socket);
 	asio::awaitable<void> Connect();
 }
