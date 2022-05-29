@@ -26,12 +26,14 @@ asio::awaitable<void> Network::Handle::Idle(tcp::socket& Socket)
 	}
 }
 
-asio::awaitable<void> Network::Handle::Initialization(tcp::socket& Socket, CryptoPP::RSA::PrivateKey& PrivateKey)
+asio::awaitable<void> Network::Handle::Initialization(tcp::socket& Socket)
 {
+	CryptoPP::RSA::PrivateKey ClientPrivateKey = Crypto::Rsa::GeneratePrivate();
+
 	// Write
 	{
 		// Setup client public key
-		const std::string ClientPublicKey = Utilities::GetPublicKeyStr(PrivateKey);
+		const std::string ClientPublicKey = Utilities::GetPublicKeyStr(ClientPrivateKey);
 
 		const json Json =
 		{
@@ -55,7 +57,7 @@ asio::awaitable<void> Network::Handle::Initialization(tcp::socket& Socket, Crypt
 
 		// Decode and decrypt the aes key received from the server
 		std::string AesKey = Crypto::Hex::Decode(Json["AesKey"]);
-		AesKey = Crypto::Rsa::Decrypt(AesKey, PrivateKey);
+		AesKey = Crypto::Rsa::Decrypt(AesKey, ClientPrivateKey);
 
 		Network::AesKey = CryptoPP::SecByteBlock(reinterpret_cast<const CryptoPP::byte*>(AesKey.data()), AesKey.size());
 
@@ -109,11 +111,15 @@ asio::awaitable<void> Network::Handle::Login(tcp::socket& Socket)
 		if (SuccessfulLogin)
 		{
 			std::cout << "[+] Successfully logged in!" << '\n';
+
+			if (Gui::RememberMe)
+			{
+				// Remember me here
+			}
 		}
 		else
 		{
-			std::cout << "[-] Failed logging in!" << '\n';
-			MessageBoxA(nullptr, "Wrong username or password.", "Error (5)", MB_ICONERROR | MB_OK);
+			MessageBoxA(nullptr, "Wrong username or password.", "Error (71)", MB_ICONERROR | MB_OK);
 		}
 	}
 

@@ -5,9 +5,6 @@ asio::awaitable<void> Network::SocketHandler(tcp::socket Socket)
 {
 	std::cout << "[+] Connected." << '\n';
 
-	// Cryptography
-	CryptoPP::RSA::PrivateKey ClientPrivateKey = Crypto::Rsa::GeneratePrivate();
-
 	while (true)
 	{
 		if (!Socket.is_open())
@@ -27,7 +24,7 @@ asio::awaitable<void> Network::SocketHandler(tcp::socket Socket)
 				}
 				case ClientStates::InitializeState:
 				{
-					co_await Handle::Initialization(Socket, ClientPrivateKey);
+					co_await Handle::Initialization(Socket);
 					break;
 				}
 				case ClientStates::LoginState:
@@ -43,7 +40,8 @@ asio::awaitable<void> Network::SocketHandler(tcp::socket Socket)
 				default:
 				{
 					std::cout << "[!] Invalid client state." << '\n';
-					break;
+					Socket.close();
+					co_return;
 				}
 			}
 		}

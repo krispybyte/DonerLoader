@@ -7,8 +7,10 @@ The `Network` project is written in `C++20` due to the ease of development when 
 - [x] Module streaming
 - [x] Client state verification handled over the server
 - [x] GUI (using [ImGui](https://github.com/ocornut/imgui "ImGui on github"))
+- [x] Login
+- [ ] Hardware ID
+- [ ] Remember Me file (encrypted with a different key per user)
 - [ ] SHA256 for the json key values
-- [ ] Login & Hardware ID check (using [MongoDB](https://github.com/mongodb/mongo-cxx-driver "MongoDB on github"))
 - [ ] Heartbeat
 - [ ] Module injection
 - [ ] Module relocations and imports handled over the server
