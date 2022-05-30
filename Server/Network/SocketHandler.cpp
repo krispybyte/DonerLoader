@@ -46,7 +46,7 @@ asio::awaitable<void> Network::Handle::Initialize(Network::Socket& Socket, json&
 		co_await Socket.Get().async_write_some(asio::buffer(WriteData, WriteData.size()), asio::use_awaitable);
 	}
 
-	// Verify keys have exchanged for this user
+	// Verify keys have exchanged for this connection
 	Socket.HasInitialized = true;
 	std::cout << "[+] Exchanged keys." << '\n';
 }
@@ -126,7 +126,7 @@ asio::awaitable<void> Network::Handle::Module(Network::Socket& Socket, json& Rea
 	}
 
 	// Get module by index
-	const auto& Module = Modules::List[ModuleId];
+	const Modules::Module& Module = Modules::List[ModuleId];
 
 	const int ModuleChunkIndex = ReadJson["Index"];
 	constexpr int ModuleChunkSize = 3072; // 3 Kilobytes

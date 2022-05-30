@@ -196,7 +196,7 @@ void Gui::CreateWnd(const char* windowName)
 
 	RegisterClassExA(&Class);
 
-	Hwnd = CreateWindowExA(0, "ClientWnd", windowName, WS_POPUP, Position.x, Position.y, Size.x, Size.y, 0, 0, Class.hInstance, 0);
+	Hwnd = CreateWindowExA(WS_EX_TOPMOST, "ClientWnd", windowName, WS_POPUP, Position.x, Position.y, Size.x, Size.y, 0, 0, Class.hInstance, 0);
 
 	ShowWindow(Hwnd, SW_SHOWDEFAULT);
 	UpdateWindow(Hwnd);
