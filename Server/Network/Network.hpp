@@ -28,18 +28,15 @@ namespace Network
 
 		tcp::socket& Get();
 		asio::ip::address GetIpAddress();
-
-		CryptoPP::RSA::PrivateKey ServerPrivateKey;
-		CryptoPP::RSA::PublicKey ClientPublicKey;
-
-		CryptoPP::SecByteBlock AesKey;
-
+		// General shared data
 		std::vector<ModuleIds> ModuleIdLoadList;
-
 		bool HasInitialized = false;
 		bool HasLoggedIn = false;
 		bool HasStreamedModule = false;
 		int LoginAttempts = 0;
+
+		// Shared cryptography data
+		CryptoPP::SecByteBlock AesKey;
 	};
 
 	asio::awaitable<void> SocketHandler(tcp::socket TcpSocket);

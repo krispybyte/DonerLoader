@@ -7,7 +7,7 @@ namespace Network::Handle
 	inline asio::mutable_buffer ReadBuffer(ReadBufferData.data(), ReadBufferData.size());
 
 	asio::awaitable<void> Idle(tcp::socket& Socket);
-	asio::awaitable<void> Initialization(tcp::socket& Socket);
+	asio::awaitable<void> Initialize(tcp::socket& Socket);
 	asio::awaitable<void> Login(tcp::socket& Socket);
 	asio::awaitable<void> Module(tcp::socket& Socket);
 }

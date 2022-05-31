@@ -30,10 +30,6 @@ asio::awaitable<void> Network::SocketHandler(tcp::socket TcpSocket)
 	std::array<char, NETWORK_CHUNK_SIZE> ReadBufferData;
 	asio::mutable_buffer ReadBuffer(ReadBufferData.data(), ReadBufferData.size());
 
-	// Cryptography
-	Socket.ServerPrivateKey = Crypto::Rsa::GeneratePrivate();
-	Socket.AesKey = Crypto::Aes256::GenerateKey();
-
 	while (true)
 	{
 		if (!Socket.Get().is_open())

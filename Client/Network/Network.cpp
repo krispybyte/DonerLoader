@@ -24,7 +24,7 @@ asio::awaitable<void> Network::SocketHandler(tcp::socket Socket)
 				}
 				case ClientStates::InitializeState:
 				{
-					co_await Handle::Initialization(Socket);
+					co_await Handle::Initialize(Socket);
 					break;
 				}
 				case ClientStates::LoginState:

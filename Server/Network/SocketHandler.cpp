@@ -19,22 +19,36 @@ asio::awaitable<void> Network::Handle::Idle(Network::Socket& Socket)
 
 asio::awaitable<void> Network::Handle::Initialize(Network::Socket& Socket, json& ReadJson)
 {
+	if (Socket.HasInitialized)
+	{
+		std::cout << "[!] User has already initialized!" << '\n';
+		Socket.Get().close();
+		co_return;
+	}
+
+	// Server cryptography data
+	CryptoPP::RSA::PrivateKey ServerPrivateKey = Crypto::Rsa::GeneratePrivate();
+	const std::string ServerPublicKey = Utilities::GetPublicKeyStr(ServerPrivateKey);
+	Socket.AesKey = Crypto::Aes256::GenerateKey();
+
+	// Client cryptography data
+	CryptoPP::RSA::PublicKey ClientPublicKey;
+
 	// Read
 	{
 		// Get the client's public key
-		const std::string ClientPublicKey = Crypto::Hex::Decode(ReadJson["ClientKey"]);
-		Socket.ClientPublicKey = Crypto::PEM::ImportKey(ClientPublicKey);
+		const std::string ClientPublicKeyData = Crypto::Hex::Decode(ReadJson["ClientKey"]);
+
+		// Convert the client's public key into a PublicKey object
+		ClientPublicKey = Crypto::PEM::ImportKey(ClientPublicKeyData);
 	}
 
 	// Write
 	{
-		// Setup server public key
-		const std::string ServerPublicKey = Utilities::GetPublicKeyStr(Socket.ServerPrivateKey);
-
 		// Convert aes key to a string then encrypt it using the client's
 		// public rsa key which was read, and then encode it using hex
 		std::string AesKey = std::string(reinterpret_cast<const char*>(Socket.AesKey.data()), Socket.AesKey.size());
-		AesKey = Crypto::Hex::Encode(Crypto::Rsa::Encrypt(AesKey, Socket.ClientPublicKey));
+		AesKey = Crypto::Hex::Encode(Crypto::Rsa::Encrypt(AesKey, ClientPublicKey));
 
 		const json Json =
 		{
@@ -63,8 +77,6 @@ asio::awaitable<void> Network::Handle::Login(Network::Socket& Socket, json& Read
 	// Read
 	const std::string DecryptedUsername = Utilities::DecryptMessage(ReadJson["Username"], ReadJson["AesIv"], Socket.AesKey);
 	const std::string DecryptedPassword = Utilities::DecryptMessage(ReadJson["Password"], ReadJson["AesIv"], Socket.AesKey);
-	std::cout << "[+] Username: " << DecryptedUsername.c_str() << '\n';
-	std::cout << "[+] Password: " << DecryptedPassword.c_str() << '\n';
 
 	// Write
 	{

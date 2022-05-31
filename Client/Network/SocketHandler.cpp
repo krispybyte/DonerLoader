@@ -26,7 +26,7 @@ asio::awaitable<void> Network::Handle::Idle(tcp::socket& Socket)
 	}
 }
 
-asio::awaitable<void> Network::Handle::Initialization(tcp::socket& Socket)
+asio::awaitable<void> Network::Handle::Initialize(tcp::socket& Socket)
 {
 	CryptoPP::RSA::PrivateKey ClientPrivateKey = Crypto::Rsa::GeneratePrivate();
 
@@ -91,7 +91,7 @@ asio::awaitable<void> Network::Handle::Login(tcp::socket& Socket)
 
 		LoginAttempts++;
 
-		if (LoginAttempts == 4)
+		if (LoginAttempts >= 4)
 		{
 			MessageBoxA(nullptr, "Too many login attempts have been made.", "Error (335)", MB_ICONERROR | MB_OK);
 			Gui::ShouldRun = false;
@@ -127,18 +127,8 @@ asio::awaitable<void> Network::Handle::Login(tcp::socket& Socket)
 	Network::ClientState = ClientStates::IdleState;
 }
 
-bool Opened = false;
-std::ofstream File;
-
 asio::awaitable<void> Network::Handle::Module(tcp::socket& Socket)
 {
-	// Temporary for debug purposes
-	if (!Opened)
-	{
-		File.open("Modules/ClientRaw.txt", std::ios::binary);
-		Opened = true;
-	}
-
 	constexpr int ModuleId = Network::ModuleIds::Test8MB;
 
 	// Write
@@ -172,9 +162,6 @@ asio::awaitable<void> Network::Handle::Module(tcp::socket& Socket)
 			std::cout << '\n' << "[!] Module has successfully streamed! Debug information:" << '\n';
 			std::cout <<		 "[+] Module id: " << ModuleId << '\n';
 			std::cout <<		 "[+] Took " << Module::ChunkIndex + 1 << " streams (3KB each)";
-
-			File << std::string(Module::Data.begin(), Module::Data.end());
-			File.close();
 
 			// Set state to the next one
 			Network::ClientState = ClientStates::IdleState;

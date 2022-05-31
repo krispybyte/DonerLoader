@@ -3,6 +3,8 @@
 #include <backends/imgui_impl_win32.h>
 #include <backends/imgui_impl_dx9.h>
 
+//extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+
 void Gui::Render()
 {
 	ImGui::SetNextWindowPos({ 0, 0 });
@@ -125,7 +127,7 @@ void Gui::Run()
 	ClearWnd();
 }
 
-extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND Hwnd, UINT Msg, WPARAM wParam, LPARAM lParam);
+extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 long __stdcall WindowProcess(HWND window, UINT message, WPARAM wideParameter, LPARAM longParameter)
 {
