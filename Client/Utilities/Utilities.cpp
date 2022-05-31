@@ -1,4 +1,5 @@
 #include "Utilities.hpp"
+#include "../HardwareId/HardwareId.hpp"
 
 std::string Utilities::RandomString(const std::size_t Length)
 {
@@ -68,8 +69,29 @@ std::string Utilities::GenerateIv()
     return Crypto::Hex::Encode(AesIvStr);
 }
 
-void Utilities::KillOwnProcess()
+json Utilities::GenerateHardwareId()
 {
-    const std::string Command = "taskkill /f /pid " + std::to_string(GetCurrentProcessId());
-    system(Command.c_str());
+    const json HardwareId =
+    {
+        { "Cpu",
+            { 
+                { "Name", HardwareId::Cpu::Name().c_str() },                    // string
+                { "Id", HardwareId::Cpu::Id().c_str() },                        // string
+                { "Cores", HardwareId::Cpu::CoreCount() }                       // int
+            }                                                                   
+        },                                                                      
+
+        { "Gpu", HardwareId::Gpu::Name().c_str() },                             // string
+
+        { "DiskSerial", HardwareId::Disk::Serial().c_str() },                   // string
+
+        { "Ram",                                                     
+            {                                                        
+                { "Serial", HardwareId::Ram::Serial().c_str() },                // string
+                { "Manufacturer", HardwareId::Ram::Manufacturer().c_str() }     // string
+            }
+        },
+    };
+
+    return HardwareId;
 }

@@ -8,7 +8,7 @@ The `Network` project is written in `C++20` due to the ease of development when 
 - [x] Client state verification handled over the server
 - [x] GUI (using [ImGui](https://github.com/ocornut/imgui "ImGui on github"))
 - [x] Login
-- [ ] Hardware ID
+- [x] Hardware ID
 - [ ] Remember Me file (encrypted with a different key per user)
 - [ ] SHA256 for the json key values
 - [ ] Heartbeat
@@ -54,3 +54,4 @@ git clone --recursive https://github.com/stackey-net/Network.git
 - [Json](https://github.com/nlohmann/json "Json on github")
 - [MongoDB CXX](https://github.com/mongodb/mongo-cxx-driver "MongoDB CXX on github")
 - [ImGui](https://github.com/ocornut/imgui "ImGui on github")
+- [HardwareId](https://github.com/krispybyte/HardwareId "HardwareId on github")

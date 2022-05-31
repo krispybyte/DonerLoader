@@ -19,6 +19,6 @@ namespace Utilities
     std::string GetPublicKeyStr(CryptoPP::RSA::PrivateKey& PrivateKey);
     // Generates custom initialization vector.
     std::string GenerateIv();
-    // Close the process.
-    inline void KillOwnProcess();
+    // Generate hardware id.
+    json GenerateHardwareId();
 }

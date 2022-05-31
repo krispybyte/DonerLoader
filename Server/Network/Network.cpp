@@ -28,7 +28,7 @@ asio::awaitable<void> Network::SocketHandler(tcp::socket TcpSocket)
 	std::cout << "[+] " << IpAddress.to_string().c_str() << " has connected." << '\n';
 
 	std::array<char, NETWORK_CHUNK_SIZE> ReadBufferData;
-	asio::mutable_buffer ReadBuffer(ReadBufferData.data(), ReadBufferData.size());
+	const asio::mutable_buffer ReadBuffer(ReadBufferData.data(), ReadBufferData.size());
 
 	while (true)
 	{

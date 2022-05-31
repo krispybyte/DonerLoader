@@ -14,8 +14,8 @@ int main()
 	Gui::Run();
 
 	// Clean data on finish
-	Module::Data.erase(Module::Data.begin(), Module::Data.end());
-	Module::Data.shrink_to_fit();
+	ClientInformation::Data.erase(ClientInformation::Data.begin(), ClientInformation::Data.end());
+	ClientInformation::Data.shrink_to_fit();
 	ExitProcess(EXIT_SUCCESS);
 
 	return std::getchar();
