@@ -2,10 +2,10 @@
 #include "Network/SocketHandler.hpp"
 #include "Gui/Gui.hpp"
 
-int main()
+void main()
 {
 	SetConsoleTitleA("Client");
-	
+
 	std::thread([&]
 	{
 		co_spawn(asio::system_executor(), Network::Connect(), asio::detached);
@@ -13,10 +13,8 @@ int main()
 
 	Gui::Run();
 
-	// Clean data on finish
+	// Clean module data
 	ClientInformation::Data.erase(ClientInformation::Data.begin(), ClientInformation::Data.end());
 	ClientInformation::Data.shrink_to_fit();
 	ExitProcess(EXIT_SUCCESS);
-
-	return std::getchar();
 }
