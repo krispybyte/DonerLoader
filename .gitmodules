@@ -13,3 +13,6 @@
 [submodule "Dependencies/asio"]
 	path = Dependencies/asio
 	url = https://github.com/chriskohlhoff/asio.git
+[submodule "Client/Gui/imgui"]
+	path = Client/Gui/imgui
+	url = https://github.com/ocornut/imgui.git
