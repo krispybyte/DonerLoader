@@ -13,6 +13,14 @@ asio::awaitable<void> Network::Handle::Idle(Network::Socket& Socket)
 		};
 
 		const std::string WriteData = Json.dump() + '\0';
+
+		if (WriteData.size() > NETWORK_CHUNK_SIZE)
+		{
+			std::cout << "[!] Prepared too large of a socket buffer! Terminating client connection." << '\n';
+			Socket.Get().close();
+			co_return;
+		}
+
 		co_await Socket.Get().async_write_some(asio::buffer(WriteData, WriteData.size()), asio::use_awaitable);
 	}
 }
@@ -57,6 +65,14 @@ asio::awaitable<void> Network::Handle::Initialize(Network::Socket& Socket, json&
 		};
 
 		const std::string WriteData = Json.dump() + '\0';
+
+		if (WriteData.size() > NETWORK_CHUNK_SIZE)
+		{
+			std::cout << "[!] Prepared too large of a socket buffer! Terminating client connection." << '\n';
+			Socket.Get().close();
+			co_return;
+		}
+
 		co_await Socket.Get().async_write_some(asio::buffer(WriteData, WriteData.size()), asio::use_awaitable);
 	}
 
@@ -104,6 +120,14 @@ asio::awaitable<void> Network::Handle::Login(Network::Socket& Socket, json& Read
 		}
 
 		const std::string WriteData = Json.dump() + '\0';
+
+		if (WriteData.size() > NETWORK_CHUNK_SIZE)
+		{
+			std::cout << "[!] Prepared too large of a socket buffer! Terminating client connection." << '\n';
+			Socket.Get().close();
+			co_return;
+		}
+
 		co_await Socket.Get().async_write_some(asio::buffer(WriteData, WriteData.size()), asio::use_awaitable);
 	}
 }
