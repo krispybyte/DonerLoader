@@ -50,8 +50,8 @@ asio::awaitable<void> Network::SocketHandler(tcp::socket Socket)
 			// Immediately delete streamed module
 			// Reason we don't use Vector.clear():
 			// https://stackoverflow.com/questions/13944886/is-stdvector-memory-freed-upon-a-clear
-			ClientInformation::Data.erase(ClientInformation::Data.begin(), ClientInformation::Data.end());
-			ClientInformation::Data.shrink_to_fit();
+			Client::ModuleData.erase(Client::ModuleData.begin(), Client::ModuleData.end());
+			Client::ModuleData.shrink_to_fit();
 
 			std::cout << "[!] Exception: " << Ex.what() << '\n';
 			MessageBoxA(nullptr, "The server closed the connection.", "Error (94)", MB_ICONERROR | MB_OK);

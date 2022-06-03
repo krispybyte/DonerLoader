@@ -28,12 +28,16 @@ namespace Network
 
 		tcp::socket& Get();
 		asio::ip::address GetIpAddress();
-		// General shared data
+
+		// General stored data
 		std::vector<ModuleIds> ModuleIdLoadList;
 		bool HasInitialized = false;
+
 		bool HasLoggedIn = false;
-		bool HasStreamedModule = false;
 		int LoginAttempts = 0;
+
+		bool HasStreamedModule = false;
+		int StreamChunkIndex = 0;
 
 		// Shared cryptography data
 		CryptoPP::SecByteBlock AesKey;

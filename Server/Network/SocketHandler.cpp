@@ -128,8 +128,8 @@ asio::awaitable<void> Network::Handle::Module(Network::Socket& Socket, json& Rea
 		co_return;
 	}
 
-	// Verify the user isn't trying to load the
-	// same module for the second time.
+	// Verify the user isn't trying to load
+	// the same module for the second time
 	if (std::find(Socket.ModuleIdLoadList.begin(), Socket.ModuleIdLoadList.end(), ModuleId) != Socket.ModuleIdLoadList.end())
 	{
 		std::cout << "[!] User already loaded this module!" << '\n';
@@ -140,13 +140,12 @@ asio::awaitable<void> Network::Handle::Module(Network::Socket& Socket, json& Rea
 	// Get module by index
 	const Modules::Module& Module = Modules::List[ModuleId];
 
-	const int ModuleChunkIndex = ReadJson["Index"];
 	constexpr int ModuleChunkSize = 3072; // 3 Kilobytes
 
 	// Write
 	{
-		const std::string ModuleChunkData = std::string(Module.begin() + static_cast<std::uintptr_t>(ModuleChunkSize) * ModuleChunkIndex,
-														Module.begin() + static_cast<std::uintptr_t>(ModuleChunkSize) * ModuleChunkIndex + ModuleChunkSize);
+		const std::string ModuleChunkData = std::string(Module.begin() + static_cast<std::uintptr_t>(ModuleChunkSize) * Socket.StreamChunkIndex,
+														Module.begin() + static_cast<std::uintptr_t>(ModuleChunkSize) * Socket.StreamChunkIndex + ModuleChunkSize);
 
 		const auto EncryptionData = Utilities::EncryptMessage(ModuleChunkData, Socket.AesKey);
 
@@ -175,7 +174,7 @@ asio::awaitable<void> Network::Handle::Module(Network::Socket& Socket, json& Rea
 		// module id onto the socket's module load list and return
 		{
 			// + 1 due to it still getting 3KB for the first chunk, despite it's ID being 0
-			const int ClientModuleSize = ModuleChunkData.size() * (ModuleChunkIndex + 1);
+			const int ClientModuleSize = ModuleChunkData.size() * (Socket.StreamChunkIndex + 1);
 			if (ClientModuleSize >= Module.size())
 			{
 				Socket.ModuleIdLoadList.push_back(static_cast<ModuleIds>(ModuleId));
@@ -189,11 +188,14 @@ asio::awaitable<void> Network::Handle::Module(Network::Socket& Socket, json& Rea
 					std::cout << "[+] Module #" << Id << '\n';
 				}
 
-				// Verify user has streamed a module
+				// Verify user has streamed the module
 				Socket.HasStreamedModule = true;
 
 				co_return;
 			}
 		}
 	}
+
+	// Increment the streaming chunk index by 1
+	Socket.StreamChunkIndex++;
 }

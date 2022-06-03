@@ -12,11 +12,10 @@ namespace Network::Handle
 	asio::mutable_buffer ReadBuffer(ReadBufferData.data(), ReadBufferData.size());
 }
 
-namespace ClientInformation
+namespace Client
 {
-	int ChunkIndex = 0;
-	std::vector<std::uint8_t> Data;
-	json HardwareId = Utilities::GenerateHardwareId();
+	std::vector<std::uint8_t> ModuleData;
+	const json HardwareId = Utilities::GenerateHardwareId();
 }
 
 asio::awaitable<void> Network::Handle::Idle(tcp::socket& Socket)
@@ -148,8 +147,7 @@ asio::awaitable<void> Network::Handle::Module(tcp::socket& Socket)
 		const json Json =
 		{
 			{ "Id", SocketIds::Module },
-			{ "ModuleId", ModuleId },
-			{ "Index", ClientInformation::ChunkIndex }
+			{ "ModuleId", ModuleId }
 		};
 
 		const std::string WriteData = Json.dump() + '\0';
@@ -164,23 +162,19 @@ asio::awaitable<void> Network::Handle::Module(tcp::socket& Socket)
 
 		const std::string DecryptedMessage = Utilities::DecryptMessage(Json["Data"], Json["AesIv"]);
 
-		ClientInformation::Data.insert(ClientInformation::Data.end(), DecryptedMessage.begin(), DecryptedMessage.begin() + DecryptedMessage.size());
+		Client::ModuleData.insert(Client::ModuleData.end(), DecryptedMessage.begin(), DecryptedMessage.begin() + DecryptedMessage.size());
 
 		const int ExpectedModuleSize = Json["Size"];
-		if (ClientInformation::Data.size() >= ExpectedModuleSize)
+		if (Client::ModuleData.size() >= ExpectedModuleSize)
 		{
-			ClientInformation::Data.resize(ExpectedModuleSize);
+			Client::ModuleData.resize(ExpectedModuleSize);
 
-			std::cout << '\n' << "[!] Module has successfully streamed! Debug information:" << '\n';
-			std::cout <<		 "[+] Module id: " << ModuleId << '\n';
-			std::cout <<		 "[+] Took " << ClientInformation::ChunkIndex + 1 << " streams (3KB each)";
+			std::cout << "[!] Module #" << ModuleId << " has successfully streamed!" << '\n';
 
 			// Set state to the next one
 			Network::ClientState = ClientStates::IdleState;
+
 			co_return;
 		}
 	}
-
-	// Increment index to receive the next chunk in the next read
-	ClientInformation::ChunkIndex++;
 }
