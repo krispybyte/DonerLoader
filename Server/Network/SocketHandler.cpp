@@ -9,7 +9,7 @@ asio::awaitable<void> Network::Handle::Idle(Network::Socket& Socket)
 	{
 		const json Json =
 		{
-			{ "Response", NULL }
+			{ "Null", NULL }
 		};
 
 		const std::string WriteData = Json.dump() + '\0';

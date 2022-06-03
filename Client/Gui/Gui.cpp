@@ -3,17 +3,43 @@
 #include <backends/imgui_impl_win32.h>
 #include <backends/imgui_impl_dx9.h>
 
-//extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+namespace Gui
+{
+	// Loader ui data
+	bool ShouldRun = true;
+
+	bool Streamed = false;
+
+	char Username[17]; // Maximum of 16 characters
+	char Password[33]; // Maximum of 32 characters
+
+	bool RememberMe = false;
+
+	int SelectedModule = 0;
+
+	// Screen data
+	ImVec2 ScreenSize = { static_cast<float>(GetSystemMetrics(SM_CXSCREEN)), static_cast<float>(GetSystemMetrics(SM_CYSCREEN)) };
+
+	// Window data
+	HWND Hwnd;
+	WNDCLASSEX Class;
+	ImVec2 Size = { 560, 385 };
+	ImVec2 Position = { ScreenSize.x / 2 - Size.x / 2, ScreenSize.y / 2 - Size.y / 2 };
+
+	// Dx Data
+	PDIRECT3D9 DxD3D;
+	LPDIRECT3DDEVICE9 DxDevice;
+	D3DPRESENT_PARAMETERS DxPresentParameters;
+}
 
 void Gui::Render()
 {
 	ImGui::SetNextWindowPos({ 0, 0 });
 	ImGui::SetNextWindowSize(Size);
 
-	ImGui::Begin("Client", &ShouldRun, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoSavedSettings);
+	ImGui::Begin("Client", &ShouldRun, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | 
+									   ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoSavedSettings);
 	{
-		ImGui::GetWindowDrawList()->AddRectFilled({ 0, 0 }, { Size.x, Size.y }, ImGui::GetColorU32(ImGuiCol_TitleBg));
-
 		switch (Network::ClientState)
 		{
 			case Network::ClientStates::IdleState:
