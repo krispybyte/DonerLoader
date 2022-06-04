@@ -168,8 +168,8 @@ asio::awaitable<void> Network::Handle::Module(Network::Socket& Socket, json& Rea
 
 	// Write
 	{
-		const std::string ModuleChunkData = std::string(Module.begin() + static_cast<std::uintptr_t>(ModuleChunkSize) * Socket.StreamChunkIndex,
-														Module.begin() + static_cast<std::uintptr_t>(ModuleChunkSize) * Socket.StreamChunkIndex + ModuleChunkSize);
+		const std::string ModuleChunkData = std::string(Module.begin() + ModuleChunkSize * Socket.StreamChunkIndex,
+														Module.begin() + ModuleChunkSize * Socket.StreamChunkIndex + ModuleChunkSize);
 
 		const auto EncryptionData = Utilities::EncryptMessage(ModuleChunkData, Socket.AesKey);
 
@@ -194,11 +194,14 @@ asio::awaitable<void> Network::Handle::Module(Network::Socket& Socket, json& Rea
 
 		co_await Socket.Get().async_write_some(asio::buffer(WriteData, WriteData.size()), asio::use_awaitable);
 
-		// Check if we're at the last iteration, if we are, push the
-		// module id onto the socket's module load list and return
+		// Increment after writing
+		Socket.StreamChunkIndex++;
+
+		// Check if we're at the last iteration, if we are, then we
+		// push the module id onto the socket's module load list and return
 		{
-			// + 1 due to it still getting 3KB for the first chunk, despite it's ID being 0
-			const int ClientModuleSize = ModuleChunkData.size() * (Socket.StreamChunkIndex + 1);
+			const int ClientModuleSize = ModuleChunkData.size() * Socket.StreamChunkIndex;
+
 			if (ClientModuleSize >= Module.size())
 			{
 				Socket.ModuleIdLoadList.push_back(static_cast<ModuleIds>(ModuleId));
@@ -219,7 +222,4 @@ asio::awaitable<void> Network::Handle::Module(Network::Socket& Socket, json& Rea
 			}
 		}
 	}
-
-	// Increment the streaming chunk index by 1
-	Socket.StreamChunkIndex++;
 }
