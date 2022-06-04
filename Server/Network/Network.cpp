@@ -42,7 +42,7 @@ asio::awaitable<void> Network::SocketHandler(tcp::socket TcpSocket)
 		{
 			co_await Socket.Get().async_read_some(ReadBuffer, asio::use_awaitable);
 
-			json ReadJson = json::parse(reinterpret_cast<const char*>(ReadBuffer.data()));
+			const json ReadJson = json::parse(reinterpret_cast<const char*>(ReadBuffer.data()));
 
 			const SocketIds SocketId = static_cast<SocketIds>(ReadJson["Id"]);
 			switch (SocketId)

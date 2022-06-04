@@ -25,7 +25,7 @@ asio::awaitable<void> Network::Handle::Idle(Network::Socket& Socket)
 	}
 }
 
-asio::awaitable<void> Network::Handle::Initialize(Network::Socket& Socket, json& ReadJson)
+asio::awaitable<void> Network::Handle::Initialize(Network::Socket& Socket, const json& ReadJson)
 {
 	if (Socket.HasInitialized)
 	{
@@ -81,7 +81,7 @@ asio::awaitable<void> Network::Handle::Initialize(Network::Socket& Socket, json&
 	std::cout << "[+] Exchanged keys." << '\n';
 }
 
-asio::awaitable<void> Network::Handle::Login(Network::Socket& Socket, json& ReadJson)
+asio::awaitable<void> Network::Handle::Login(Network::Socket& Socket, const json& ReadJson)
 {
 	if (!Socket.HasInitialized)
 	{
@@ -132,7 +132,7 @@ asio::awaitable<void> Network::Handle::Login(Network::Socket& Socket, json& Read
 	}
 }
 
-asio::awaitable<void> Network::Handle::Module(Network::Socket& Socket, json& ReadJson)
+asio::awaitable<void> Network::Handle::Module(Network::Socket& Socket, const json& ReadJson)
 {
 	if (!Socket.HasLoggedIn)
 	{
@@ -164,12 +164,12 @@ asio::awaitable<void> Network::Handle::Module(Network::Socket& Socket, json& Rea
 	// Get module by index
 	const Modules::Module& Module = Modules::List[ModuleId];
 
-	constexpr int ModuleChunkSize = 3072; // 3 Kilobytes
+	constexpr std::size_t ModuleChunkSize = 3072; // 3 Kilobytes
 
 	// Write
 	{
-		const std::string ModuleChunkData = std::string(Module.begin() + ModuleChunkSize * Socket.StreamChunkIndex,
-														Module.begin() + ModuleChunkSize * Socket.StreamChunkIndex + ModuleChunkSize);
+		const std::string ModuleChunkData = std::string(Module.begin() + ModuleChunkSize * static_cast<std::size_t>(Socket.StreamChunkIndex),
+														Module.begin() + ModuleChunkSize * static_cast<std::size_t>(Socket.StreamChunkIndex) + ModuleChunkSize);
 
 		const auto EncryptionData = Utilities::EncryptMessage(ModuleChunkData, Socket.AesKey);
 
@@ -200,11 +200,11 @@ asio::awaitable<void> Network::Handle::Module(Network::Socket& Socket, json& Rea
 		// Check if we're at the last iteration, if we are, then we
 		// push the module id onto the socket's module load list and return
 		{
-			const int ClientModuleSize = ModuleChunkData.size() * Socket.StreamChunkIndex;
+			const int ClientModuleSize = static_cast<int>(ModuleChunkData.size()) * Socket.StreamChunkIndex;
 
 			if (ClientModuleSize >= Module.size())
 			{
-				Socket.ModuleIdLoadList.push_back(static_cast<ModuleIds>(ModuleId));
+				Socket.ModuleIdLoadList.push_back(static_cast<Network::ModuleIds>(ModuleId));
 
 				std::cout << '\n' << "[!] Module has successfully streamed!" << '\n';
 				std::cout		  << "[!] This user has streamed " << Socket.ModuleIdLoadList.size() << " module(s) so far!" << '\n';
