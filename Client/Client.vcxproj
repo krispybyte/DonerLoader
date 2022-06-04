@@ -85,8 +85,8 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>$(SolutionDir)Output\</OutDir>
-    <IntDir>$(SolutionDir)Output\Intermediates\$(ProjectName)\</IntDir>
+    <OutDir>$(SolutionDir)Output</OutDir>
+    <IntDir>$(SolutionDir)Output\Intermediates\$(ProjectName)</IntDir>
     <IncludePath>C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Include\;$(ProjectDir)Gui\imgui\;$(SolutionDir)Dependencies\;$(IncludePath)</IncludePath>
     <LibraryPath>C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Lib\x64\;$(SolutionDir)Dependencies\cryptopp\x64\Output\Release\;$(LibraryPath)</LibraryPath>
   </PropertyGroup>

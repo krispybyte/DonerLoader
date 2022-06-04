@@ -142,7 +142,7 @@ asio::awaitable<void> Network::Handle::Module(Network::Socket& Socket, json& Rea
 	}
 
 	// Read
-	const std::size_t ModuleId = ReadJson["ModuleId"];
+	const int ModuleId = ReadJson["ModuleId"];
 
 	// Validate module id
 	if (ModuleId < ModuleIds::Test8MB || ModuleId > ModuleIds::Test1KB)
@@ -198,16 +198,16 @@ asio::awaitable<void> Network::Handle::Module(Network::Socket& Socket, json& Rea
 		// module id onto the socket's module load list and return
 		{
 			// + 1 due to it still getting 3KB for the first chunk, despite it's ID being 0
-			const std::size_t ClientModuleSize = ModuleChunkData.size() * Socket.StreamChunkIndex + 1;
+			const int ClientModuleSize = ModuleChunkData.size() * (Socket.StreamChunkIndex + 1);
 			if (ClientModuleSize >= Module.size())
 			{
-				Socket.ModuleIdLoadList.push_back(static_cast<Network::ModuleIds>(ModuleId));
+				Socket.ModuleIdLoadList.push_back(static_cast<ModuleIds>(ModuleId));
 
 				std::cout << '\n' << "[!] Module has successfully streamed!" << '\n';
 				std::cout		  << "[!] This user has streamed " << Socket.ModuleIdLoadList.size() << " module(s) so far!" << '\n';
 				std::cout		  << "[!] Module streamed by this user so far (by ID):" << '\n';
 
-				for (const auto& Id : Socket.ModuleIdLoadList)
+				for (const int Id : Socket.ModuleIdLoadList)
 				{
 					std::cout << "[+] Module #" << Id << '\n';
 				}

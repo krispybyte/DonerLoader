@@ -164,7 +164,7 @@ asio::awaitable<void> Network::Handle::Login(tcp::socket& Socket)
 
 asio::awaitable<void> Network::Handle::Module(tcp::socket& Socket)
 {
-	constexpr std::size_t ModuleId = Network::ModuleIds::Test8MB;
+	constexpr int ModuleId = Network::ModuleIds::Test8MB;
 
 	// Write
 	{
