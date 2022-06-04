@@ -37,7 +37,7 @@ namespace Network
 		int LoginAttempts = 0;
 
 		bool HasStreamedModule = false;
-		int StreamChunkIndex = 0;
+		std::size_t StreamChunkIndex = 0;
 
 		// Shared cryptography data
 		CryptoPP::SecByteBlock AesKey;

@@ -40,7 +40,7 @@ namespace Network
 		Module = 1482
 	};
 
-	typedef enum ModuleIds : int
+	typedef enum ModuleIds : std::size_t
 	{
 		Test8MB = 0,
 		Test1KB = 1
