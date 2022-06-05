@@ -19,7 +19,7 @@ The `Network` project is written in `C++20` due to the ease of development when 
 # Setup
 ### Cloning
 ```
-git clone --recursive https://github.com/stackey-net/Network.git
+git clone --recursive https://github.com/krispybyte/Network.git
 ```
 
 ### Dependency compilation
