@@ -18,7 +18,7 @@ namespace Gui
 	int SelectedModule = 0;
 
 	// Screen data
-	ImVec2 ScreenSize = { static_cast<float>(GetSystemMetrics(SM_CXSCREEN)), static_cast<float>(GetSystemMetrics(SM_CYSCREEN)) };
+	const ImVec2 ScreenSize = { static_cast<float>(GetSystemMetrics(SM_CXSCREEN)), static_cast<float>(GetSystemMetrics(SM_CYSCREEN)) };
 
 	// Window data
 	HWND Hwnd;
@@ -155,19 +155,19 @@ void Gui::Run()
 
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
-long __stdcall WindowProcess(HWND window, UINT message, WPARAM wideParameter, LPARAM longParameter)
+long __stdcall WindowProcess(HWND window, UINT message, WPARAM WParam, LPARAM LParam)
 {
-	if (ImGui_ImplWin32_WndProcHandler(window, message, wideParameter, longParameter))
+	if (ImGui_ImplWin32_WndProcHandler(window, message, WParam, LParam))
 		return true;
 
 	switch (message)
 	{
 		case WM_SIZE:
 		{
-			if (Gui::DxDevice && wideParameter != SIZE_MINIMIZED)
+			if (Gui::DxDevice && WParam != SIZE_MINIMIZED)
 			{
-				Gui::DxPresentParameters.BackBufferWidth = LOWORD(longParameter);
-				Gui::DxPresentParameters.BackBufferHeight = HIWORD(longParameter);
+				Gui::DxPresentParameters.BackBufferWidth = LOWORD(LParam);
+				Gui::DxPresentParameters.BackBufferHeight = HIWORD(LParam);
 				Gui::ResetDevice();
 			}
 
@@ -175,7 +175,7 @@ long __stdcall WindowProcess(HWND window, UINT message, WPARAM wideParameter, LP
 		}
 		case WM_SYSCOMMAND:
 		{
-			if ((wideParameter & 0xfff0) == SC_KEYMENU)
+			if ((WParam & 0xfff0) == SC_KEYMENU)
 			{
 				return 0;
 			}
@@ -189,15 +189,15 @@ long __stdcall WindowProcess(HWND window, UINT message, WPARAM wideParameter, LP
 		}
 		case WM_LBUTTONDOWN:
 		{
-			const POINTS Points = MAKEPOINTS(longParameter);
+			const POINTS Points = MAKEPOINTS(LParam);
 			Gui::Position = { (float)Points.x, (float)Points.y };
 			return 0;
 		}
 		case WM_MOUSEMOVE:
 		{
-			if (wideParameter == MK_LBUTTON)
+			if (WParam == MK_LBUTTON)
 			{
-				const POINTS Points = MAKEPOINTS(longParameter);
+				const POINTS Points = MAKEPOINTS(LParam);
 				RECT Rect;
 
 				GetWindowRect(Gui::Hwnd, &Rect);
@@ -215,16 +215,16 @@ long __stdcall WindowProcess(HWND window, UINT message, WPARAM wideParameter, LP
 		}
 	}
 
-	return DefWindowProcA(window, message, wideParameter, longParameter);
+	return DefWindowProcA(window, message, WParam, LParam);
 }
 
-void Gui::CreateWnd(const char* windowName)
+void Gui::CreateWnd(const char* WindowName)
 {
 	Class = { sizeof(WNDCLASSEX), CS_CLASSDC, reinterpret_cast<WNDPROC>(WindowProcess), 0, 0, GetModuleHandleA(0), 0, 0, 0, 0, "ClientWnd", 0 };
 
 	RegisterClassExA(&Class);
 
-	Hwnd = CreateWindowExA(WS_EX_TOPMOST, "ClientWnd", windowName, WS_POPUP, Position.x, Position.y, Size.x, Size.y, 0, 0, Class.hInstance, 0);
+	Hwnd = CreateWindowExA(WS_EX_TOPMOST, "ClientWnd", WindowName, WS_POPUP, Position.x, Position.y, Size.x, Size.y, 0, 0, Class.hInstance, 0);
 
 	ShowWindow(Hwnd, SW_SHOWDEFAULT);
 	UpdateWindow(Hwnd);

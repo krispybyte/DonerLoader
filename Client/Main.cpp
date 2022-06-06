@@ -2,7 +2,7 @@
 #include "Network/SocketHandler.hpp"
 #include "Gui/Gui.hpp"
 
-void main()
+int main()
 {
 	SetConsoleTitleA("Client");
 

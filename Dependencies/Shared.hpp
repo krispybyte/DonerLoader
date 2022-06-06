@@ -27,9 +27,9 @@ using namespace nlohmann;
 
 namespace Network
 {
-#define NETWORK_CHUNK_SIZE			8192					// A maximum of 8 kilobytes
+#define NETWORK_CHUNK_SIZE			200000							// A maximum of 200 kilobytes
 #define NETWORK_PORT_INT			42069
-#define NETWORK_IP_AND_PORT_STR		"127.0.0.1", "42069"
+#define NETWORK_IP_AND_PORT_STR		"186.79.208.127", "42069"		// "127.0.0.1"
 
 	enum class SocketIds : int
 	{

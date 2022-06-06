@@ -18,7 +18,7 @@ namespace Gui
 	extern int SelectedModule;
 
 	// Screen data
-	extern ImVec2 ScreenSize;
+	extern const ImVec2 ScreenSize;
 
 	// Window data
 	extern HWND Hwnd;
@@ -33,7 +33,7 @@ namespace Gui
 
 	void Run();
 
-	void CreateWnd(const char* Name);
+	void CreateWnd(const char* WindowName);
 	void ClearWnd();
 
 	bool CreateDevice();

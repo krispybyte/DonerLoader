@@ -164,7 +164,7 @@ asio::awaitable<void> Network::Handle::Module(Network::Socket& Socket, const jso
 	// Get module by index
 	const Modules::Module& Module = Modules::List[ModuleId];
 
-	constexpr std::size_t ModuleChunkSize = 3072; // 3 Kilobytes
+	constexpr std::size_t ModuleChunkSize = 80000; // 80 Kilobytes
 
 	// Write
 	{
@@ -208,7 +208,7 @@ asio::awaitable<void> Network::Handle::Module(Network::Socket& Socket, const jso
 
 				std::cout << '\n' << "[!] Module has successfully streamed!" << '\n';
 				std::cout		  << "[!] This user has streamed " << Socket.ModuleIdLoadList.size() << " module(s) so far!" << '\n';
-				std::cout		  << "[!] Module streamed by this user so far (by ID):" << '\n';
+				std::cout		  << "[!] Modules streamed by this user so far (by ID):" << '\n';
 
 				for (const int Id : Socket.ModuleIdLoadList)
 				{
