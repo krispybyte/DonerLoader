@@ -9,8 +9,9 @@ The `Network` project is written in `C++20` due to the ease of development when 
 - [x] GUI (using [ImGui](https://github.com/ocornut/imgui "ImGui on github"))
 - [x] Login
 - [x] Hardware ID
+- [ ] Move cryptography into a static lib file
 - [ ] Remember Me file (encrypted with a different key per user)
-- [ ] SHA256 for the json key values
+- [ ] Hash json key values
 - [ ] Heartbeat
 - [ ] Module injection
 - [ ] Module relocations and imports handled over the server
