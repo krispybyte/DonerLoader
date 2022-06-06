@@ -1,18 +1,18 @@
-[submodule "Dependencies/cryptopp"]
-	path = Dependencies/cryptopp
+[submodule "Loader/Dependencies/cryptopp"]
+	path = Loader/Dependencies/cryptopp
 	url = https://github.com/noloader/cryptopp.git
-[submodule "Dependencies/json"]
-	path = Dependencies/json
+[submodule "Loader/Dependencies/json"]
+	path = Loader/Dependencies/json
 	url = https://github.com/nlohmann/json.git
-[submodule "Dependencies/mongo-c-driver"]
-	path = Dependencies/mongo-c-driver
+[submodule "Loader/Dependencies/mongo-c-driver"]
+	path = Loader/Dependencies/mongo-c-driver
 	url = https://github.com/mongodb/mongo-c-driver.git
-[submodule "Dependencies/mongo-cxx-driver"]
-	path = Dependencies/mongo-cxx-driver
+[submodule "Loader/Dependencies/mongo-cxx-driver"]
+	path = Loader/Dependencies/mongo-cxx-driver
 	url = https://github.com/mongodb/mongo-cxx-driver.git
-[submodule "Dependencies/asio"]
-	path = Dependencies/asio
+[submodule "Loader/Dependencies/asio"]
+	path = Loader/Dependencies/asio
 	url = https://github.com/chriskohlhoff/asio.git
-[submodule "Client/Gui/imgui"]
-	path = Client/Gui/imgui
+[submodule "Loader/Client/Gui/imgui"]
+	path = Loader/Client/Gui/imgui
 	url = https://github.com/ocornut/imgui
