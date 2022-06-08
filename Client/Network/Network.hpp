@@ -17,13 +17,13 @@ namespace Network
 		ModuleState,
 	};
 
-	inline Network::ClientStates ClientState = Network::ClientStates::InitializeState;
+	extern Network::ClientStates ClientState;
 
-	inline CryptoPP::RSA::PublicKey ServerPublicKey;
-	inline CryptoPP::SecByteBlock AesKey;
+	extern CryptoPP::RSA::PublicKey ServerPublicKey;
+	extern CryptoPP::SecByteBlock AesKey;
 
-	inline bool SuccessfulLogin = false;
-	inline std::uint8_t LoginAttempts = 0;
+	extern Network::LoginStatusIds LoginStatus;
+	extern std::uint8_t LoginAttempts;
 
 	asio::awaitable<void> SocketHandler(tcp::socket Socket);
 	asio::awaitable<void> Connect();

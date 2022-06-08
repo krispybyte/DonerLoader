@@ -119,7 +119,8 @@ asio::awaitable<void> Network::Handle::Login(tcp::socket& Socket)
 			{ "Id", SocketIds::Login },
 			{ "AesIv", AesIv },
 			{ "Username", EncryptedUsername },
-			{ "Password", EncryptedPassword }
+			{ "Password", EncryptedPassword },
+			{ "Hwid", Client::HardwareId }
 		};
 
 		const std::string WriteData = Json.dump() + '\0';
@@ -154,26 +155,46 @@ asio::awaitable<void> Network::Handle::Login(tcp::socket& Socket)
 		VM_START
 		const json Json = json::parse(reinterpret_cast<const char*>(ReadBuffer.data()));
 
-		SuccessfulLogin = Json["Success"];
+		LoginStatus = Json["Status"];
+		VM_END
 
-		if (SuccessfulLogin)
+		STR_ENCRYPT_START
+		// Handle login status
+		switch (LoginStatus)
 		{
-			std::cout << "[+] Successfully logged in!" << '\n';
-
-			if (Gui::RememberMe)
+			case LoginStatusIds::Success:
 			{
-				// Remember me here
+				std::cout << "[+] Successfully logged in!" << '\n';
+
+				if (Gui::RememberMe)
+				{
+					// Remember me here
+				}
+
+				break;
+			}
+			case LoginStatusIds::WrongCredentials:
+			{
+				MessageBoxA(nullptr, "Wrong username or password.", "Error (71)", MB_ICONERROR | MB_OK);
+				break;
+			}
+			case LoginStatusIds::WrongHwid:
+			{
+				MessageBoxA(nullptr, "Hardware ID Mismatch.", "Error (102)", MB_ICONERROR | MB_OK);
+				Socket.close();
+				ExitProcess(102);
+			}
+			default:
+			{
+				Socket.close();
+				co_return;
 			}
 		}
-		else
-		{
-			MessageBoxA(nullptr, "Wrong username or password.", "Error (71)", MB_ICONERROR | MB_OK);
-		}
+		STR_ENCRYPT_END
 	}
 
 	// Set state to the next one
 	Network::ClientState = ClientStates::IdleState;
-	VM_END
 }
 
 int Times = 0;

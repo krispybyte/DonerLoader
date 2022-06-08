@@ -46,7 +46,7 @@ void Gui::Render()
 		{
 			case Network::ClientStates::IdleState:
 			{
-				if (!Network::SuccessfulLogin)
+				if (Network::LoginStatus != Network::LoginStatusIds::Success)
 				{
 					ImGui::PushItemWidth(160);
 

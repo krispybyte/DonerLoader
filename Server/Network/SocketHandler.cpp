@@ -90,34 +90,57 @@ asio::awaitable<void> Network::Handle::Login(Network::Socket& Socket, const json
 		co_return;
 	}
 
+	if (Socket.WrongHwid)
+	{
+		Socket.Get().close();
+		co_return;
+	}
+
 	// Read
 	const std::string DecryptedUsername = Utilities::DecryptMessage(ReadJson["Username"], ReadJson["AesIv"], Socket.AesKey);
 	const std::string DecryptedPassword = Utilities::DecryptMessage(ReadJson["Password"], ReadJson["AesIv"], Socket.AesKey);
+	const json Hwid = ReadJson["Hwid"];
 
 	// Write
 	{
-		const bool SuccessfulLogin = Database::VerifyLogin(DecryptedUsername, DecryptedPassword);
+		const LoginStatusIds LoginStatusId = Database::VerifyLogin(DecryptedUsername, DecryptedPassword, Hwid);
+
+		// Handle login status
+		switch (LoginStatusId)
+		{
+			case LoginStatusIds::Success:
+			{
+				// Verify user has logged in
+				Socket.HasLoggedIn = true;
+				break;
+			}
+			case LoginStatusIds::WrongCredentials:
+			{
+				Socket.LoginAttempts++;
+
+				if (Socket.LoginAttempts == 4)
+				{
+					Socket.Get().close();
+					co_return;
+				}
+				break;
+			}
+			case LoginStatusIds::WrongHwid:
+			{
+				Socket.WrongHwid = true;
+				break;
+			}
+			default:
+			{
+				Socket.Get().close();
+				co_return;
+			}
+		}
 
 		const json Json =
 		{
-			{ "Success", SuccessfulLogin }
+			{ "Status", LoginStatusId }
 		};
-
-		if (SuccessfulLogin)
-		{
-			// Verify user has logged in
-			Socket.HasLoggedIn = true;
-		}
-		else
-		{
-			Socket.LoginAttempts++;
-		}
-
-		if (Socket.LoginAttempts == 4)
-		{
-			Socket.Get().close();
-			co_return;
-		}
 
 		const std::string WriteData = Json.dump() + '\0';
 

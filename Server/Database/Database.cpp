@@ -1,7 +1,5 @@
 #include "Database.hpp"
 #include "Uri.hpp"
-#include <json/single_include/nlohmann/json.hpp>
-using namespace nlohmann;
 
 namespace Database
 {
@@ -30,7 +28,7 @@ mongocxx::collection Database::GetCollection(const mongocxx::database& Database,
 	return Database[CollectionName];
 }
 
-bool Database::VerifyLogin(const std::string& Username, const std::string& Password)
+Network::LoginStatusIds Database::VerifyLogin(const std::string& Username, const std::string& Password, const json& Hwid)
 {
 	mongocxx::cursor UsersCursor = Users.find({});
 
@@ -53,11 +51,30 @@ bool Database::VerifyLogin(const std::string& Username, const std::string& Passw
 
 		if (DbPassword != Password)
 		{
-			continue;
+			return Network::LoginStatusIds::WrongCredentials;
 		}
 
-		return true;
+		// Get the hwid
+		const std::string DbHwid = static_cast<std::string>(Json["hwid"]);
+
+		// Set the hwid if it's not set in the db
+		if (DbHwid.empty())
+		{
+			SetFieldValue<std::string>(Users, Document, "hwid", Hwid.dump());
+			return Network::LoginStatusIds::Success;
+		}
+
+		// Get the hwid as a json
+		const json DbHwidJson = json::parse(DbHwid);
+		
+		// If the hwid is set in the db we will check for mismatches
+		if (DbHwidJson != Hwid)
+		{
+			return Network::LoginStatusIds::WrongHwid;
+		}
+
+		return Network::LoginStatusIds::Success;
 	}
 
-	return false;
+	return Network::LoginStatusIds::WrongCredentials;
 }

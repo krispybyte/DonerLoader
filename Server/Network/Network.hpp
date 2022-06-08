@@ -36,6 +36,8 @@ namespace Network
 		bool HasLoggedIn = false;
 		int LoginAttempts = 0;
 
+		bool WrongHwid = false;
+
 		bool HasStreamedModule = false;
 		int StreamChunkIndex = 0;
 

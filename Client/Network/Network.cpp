@@ -2,6 +2,17 @@
 #include "SocketHandler.hpp"
 #include <ThemidaSDK.h>
 
+namespace Network
+{
+	Network::ClientStates ClientState = Network::ClientStates::InitializeState;
+
+	CryptoPP::RSA::PublicKey ServerPublicKey;
+	CryptoPP::SecByteBlock AesKey;
+
+	Network::LoginStatusIds LoginStatus;
+	std::uint8_t LoginAttempts = 0;
+}
+
 asio::awaitable<void> Network::SocketHandler(tcp::socket Socket)
 {
 	Client::HasConnected = true;

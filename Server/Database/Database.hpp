@@ -1,10 +1,13 @@
 #pragma once
+#include <Shared.hpp>
 #include <mongocxx/client.hpp>
 #include <mongocxx/database.hpp>
 #include <mongocxx/uri.hpp>
 #include <mongocxx/instance.hpp>
 #include <bsoncxx/json.hpp>
 using namespace bsoncxx::builder::basic;
+#include <json/single_include/nlohmann/json.hpp>
+using namespace nlohmann;
 
 namespace Database
 {
@@ -20,5 +23,5 @@ namespace Database
 	{
 		Collection.update_one(Document, make_document(kvp("$set", make_document(kvp(FieldName, NewFieldValue)))));
 	}
-	bool VerifyLogin(const std::string& Username, const std::string& Password);
+	Network::LoginStatusIds VerifyLogin(const std::string& Username, const std::string& Password, const json& Hwid);
 }
