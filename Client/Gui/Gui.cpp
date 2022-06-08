@@ -2,6 +2,8 @@
 #include "Fonts/Fonts.hpp"
 #include <backends/imgui_impl_win32.h>
 #include <backends/imgui_impl_dx9.h>
+#include <ThemidaSDK.h>
+#include "../Network/SocketHandler.hpp"
 
 namespace Gui
 {
@@ -34,6 +36,7 @@ namespace Gui
 
 void Gui::Render()
 {
+	VM_START
 	ImGui::SetNextWindowPos({ 0, 0 });
 	ImGui::SetNextWindowSize(Size);
 
@@ -76,7 +79,7 @@ void Gui::Render()
 					ImGui::SetCursorPos({ Size.x / 2 - ImGui::CalcTextSize("Please choose a module to load").x / 2, Size.y / 4 });
 					ImGui::Text("Please choose a module to load");
 
-					static const char* AvailableModules[] { "CS:GO", "Rust", "Escape from Tarkov" };
+					static const char* AvailableModules[]{ "CS:GO", "Rust", "Escape from Tarkov" };
 					ImGui::SetCursorPos({ Size.x / 2 - 160 / 2, Size.y / 3.2f });
 					ImGui::SetNextItemWidth(160);
 					ImGui::ListBox("##Modules", &SelectedModule, AvailableModules, IM_ARRAYSIZE(AvailableModules), 4);
@@ -104,32 +107,36 @@ void Gui::Render()
 			}
 			case Network::ClientStates::InitializeState:
 			{
-				ImGui::SetCursorPos({ Size.x / 2 - ImGui::CalcTextSize("Initializing resources...").x / 2, Size.y / 2.4f });
-				ImGui::Text("Initializing resources...");
+				ImGui::SetCursorPos({ Size.x / 2 - ImGui::CalcTextSize("Initializing and securing...").x / 2, Size.y / 2.4f });
+				ImGui::Text("Initializing and securing...");
 				break;
 			}
 			case Network::ClientStates::LoginState:
 			{
-				ImGui::SetCursorPos({ Size.x / 2 - ImGui::CalcTextSize("Logging in...").x / 2, Size.y / 2.4f });
-				ImGui::Text("Logging in...");
+				ImGui::SetCursorPos({ Size.x / 2 - ImGui::CalcTextSize("Logging you right in...").x / 2, Size.y / 2.4f });
+				ImGui::Text("Logging you right in...");
 				break;
 			}
 			case Network::ClientStates::ModuleState:
 			{
-				ImGui::SetCursorPos({ Size.x / 2 - ImGui::CalcTextSize("Loading module...").x / 2, Size.y / 2.4f });
-				ImGui::Text("Loading module...");
+				ImGui::SetCursorPos({ Size.x / 2 - ImGui::CalcTextSize("Loading the module...").x / 2, Size.y / 2.4f });
+				ImGui::Text("Loading the module...");
+				ImGui::SetCursorPos({ Size.x / 2 - (ImGui::CalcTextSize("Don't worry , this shouldn't take long.").x + ImGui::CalcTextSize(Username).x) / 2, Size.y / 2.2f });
+				ImGui::Text("Don't worry %s, this shouldn't take long.", Username);
 				break;
 			}
 			default:
 			{
-				MessageBoxA(nullptr, "Invalid state.", "Error (55)", MB_ICONERROR | MB_OK);
-				ShouldRun = false;
+				Client::ModuleData.erase(Client::ModuleData.begin(), Client::ModuleData.end());
+				Client::ModuleData.shrink_to_fit();
+				ExitProcess(EXIT_FAILURE);
 				return;
 			}
 		}
 
 		ImGui::End();
 	}
+	VM_END
 }
 
 void Gui::Run()
@@ -220,6 +227,7 @@ long __stdcall WindowProcess(HWND window, UINT message, WPARAM WParam, LPARAM LP
 
 void Gui::CreateWnd(const char* WindowName)
 {
+	MUTATE_START
 	Class = { sizeof(WNDCLASSEX), CS_CLASSDC, reinterpret_cast<WNDPROC>(WindowProcess), 0, 0, GetModuleHandleA(0), 0, 0, 0, 0, "ClientWnd", 0 };
 
 	RegisterClassExA(&Class);
@@ -228,6 +236,7 @@ void Gui::CreateWnd(const char* WindowName)
 
 	ShowWindow(Hwnd, SW_SHOWDEFAULT);
 	UpdateWindow(Hwnd);
+	MUTATE_END
 }
 
 void Gui::ClearWnd()

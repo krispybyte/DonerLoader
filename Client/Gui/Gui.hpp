@@ -33,7 +33,7 @@ namespace Gui
 
 	void Run();
 
-	void CreateWnd(const char* WindowName);
+	extern inline void CreateWnd(const char* WindowName);
 	void ClearWnd();
 
 	bool CreateDevice();
@@ -45,5 +45,5 @@ namespace Gui
 
 	void BeginRender();
 	void EndRender();
-	void Render();
+	extern inline void Render();
 }

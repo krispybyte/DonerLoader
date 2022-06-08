@@ -5,6 +5,7 @@
 #include "../Cryptography/Base64.hpp"
 #include "../Gui/Gui.hpp"
 #include "../Utilities/Utilities.hpp"
+#include <ThemidaSDK.h>
 
 namespace Network::Handle
 {
@@ -16,6 +17,7 @@ namespace Client
 {
 	std::vector<std::uint8_t> ModuleData;
 	const json HardwareId = Utilities::GenerateHardwareId();
+	bool HasConnected = false;
 }
 
 asio::awaitable<void> Network::Handle::Idle(tcp::socket& Socket)
@@ -51,6 +53,7 @@ asio::awaitable<void> Network::Handle::Initialize(tcp::socket& Socket)
 
 	// Write
 	{
+		VM_START
 		// Setup client public key
 		const std::string ClientPublicKey = Utilities::GetPublicKeyStr(ClientPrivateKey);
 
@@ -68,6 +71,7 @@ asio::awaitable<void> Network::Handle::Initialize(tcp::socket& Socket)
 			Socket.close();
 			co_return;
 		}
+		VM_END
 
 		co_await Socket.async_write_some(asio::buffer(WriteData, WriteData.size()), asio::use_awaitable);
 	}
@@ -76,10 +80,12 @@ asio::awaitable<void> Network::Handle::Initialize(tcp::socket& Socket)
 	{
 		co_await Socket.async_read_some(ReadBuffer, asio::use_awaitable);
 
+		VM_START
 		const json Json = json::parse(reinterpret_cast<const char*>(ReadBuffer.data()));
 
 		// Decode and set the server's public key
 		const std::string ServerPublicKey = Crypto::Hex::Decode(Json["ServerKey"]);
+		VM_END
 		Network::ServerPublicKey = Crypto::PEM::ImportKey(ServerPublicKey);
 
 		// Decode and decrypt the aes key received from the server
@@ -100,11 +106,14 @@ asio::awaitable<void> Network::Handle::Login(tcp::socket& Socket)
 {
 	// Write
 	{
+		VM_START
 		const std::string AesIv = Utilities::GenerateIv();
+		VM_END
 
 		const std::string EncryptedUsername = Utilities::EncryptMessage(Gui::Username, AesIv);
 		const std::string EncryptedPassword = Utilities::EncryptMessage(Gui::Password, AesIv);
 		
+		VM_START
 		const json Json =
 		{
 			{ "Id", SocketIds::Login },
@@ -121,9 +130,11 @@ asio::awaitable<void> Network::Handle::Login(tcp::socket& Socket)
 			Socket.close();
 			co_return;
 		}
+		VM_END
 
 		co_await Socket.async_write_some(asio::buffer(WriteData, WriteData.size()), asio::use_awaitable);
 
+		VM_START
 		LoginAttempts++;
 
 		if (LoginAttempts >= 4)
@@ -133,12 +144,14 @@ asio::awaitable<void> Network::Handle::Login(tcp::socket& Socket)
 			Socket.close();
 			co_return;
 		}
+		VM_END
 	}
 
 	// Read
 	{
 		co_await Socket.async_read_some(ReadBuffer, asio::use_awaitable);
 
+		VM_START
 		const json Json = json::parse(reinterpret_cast<const char*>(ReadBuffer.data()));
 
 		SuccessfulLogin = Json["Success"];
@@ -160,18 +173,21 @@ asio::awaitable<void> Network::Handle::Login(tcp::socket& Socket)
 
 	// Set state to the next one
 	Network::ClientState = ClientStates::IdleState;
+	VM_END
 }
+
+int Times = 0;
+constexpr int ModuleId = Network::ModuleIds::Test8MB;
 
 asio::awaitable<void> Network::Handle::Module(tcp::socket& Socket)
 {
-	constexpr int ModuleId = Network::ModuleIds::Test8MB;
-
 	// Write
 	{
+		VM_START
 		const json Json =
 		{
 			{ "Id", SocketIds::Module },
-			{ "ModuleId", ModuleId }
+			{ "ModuleId", Network::ModuleIds::Test8MB }
 		};
 
 		const std::string WriteData = Json.dump() + '\0';
@@ -182,6 +198,7 @@ asio::awaitable<void> Network::Handle::Module(tcp::socket& Socket)
 			Socket.close();
 			co_return;
 		}
+		VM_END
 
 		co_await Socket.async_write_some(asio::buffer(WriteData, WriteData.size()), asio::use_awaitable);
 	}
@@ -190,11 +207,18 @@ asio::awaitable<void> Network::Handle::Module(tcp::socket& Socket)
 	{
 		co_await Socket.async_read_some(ReadBuffer, asio::use_awaitable);
 
+		VM_START
+		Times++;
+		std::cout << "Read #" << Times << std::endl;
+
 		const json Json = json::parse(reinterpret_cast<const char*>(ReadBuffer.data()));
+		VM_END
 
 		const std::string DecryptedMessage = Utilities::DecryptMessage(Json["Data"], Json["AesIv"]);
 
+		VM_START
 		Client::ModuleData.insert(Client::ModuleData.end(), DecryptedMessage.begin(), DecryptedMessage.begin() + DecryptedMessage.size());
+		VM_END
 
 		const int ExpectedModuleSize = Json["Size"];
 		if (Client::ModuleData.size() >= ExpectedModuleSize)
@@ -205,7 +229,6 @@ asio::awaitable<void> Network::Handle::Module(tcp::socket& Socket)
 
 			// Set state to the next one
 			Network::ClientState = ClientStates::IdleState;
-
 			co_return;
 		}
 	}
