@@ -3,6 +3,13 @@
 #include <json/single_include/nlohmann/json.hpp>
 using namespace nlohmann;
 
+namespace Database
+{
+	mongocxx::client Connection;
+	mongocxx::database Db;
+	mongocxx::collection Users;
+}
+
 mongocxx::client Database::Connect()
 {
 	// Mongo instance

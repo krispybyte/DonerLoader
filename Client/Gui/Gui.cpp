@@ -36,7 +36,6 @@ namespace Gui
 
 void Gui::Render()
 {
-	VM_START
 	ImGui::SetNextWindowPos({ 0, 0 });
 	ImGui::SetNextWindowSize(Size);
 
@@ -136,7 +135,6 @@ void Gui::Render()
 
 		ImGui::End();
 	}
-	VM_END
 }
 
 void Gui::Run()

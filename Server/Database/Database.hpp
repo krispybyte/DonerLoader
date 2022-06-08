@@ -4,15 +4,21 @@
 #include <mongocxx/uri.hpp>
 #include <mongocxx/instance.hpp>
 #include <bsoncxx/json.hpp>
+using namespace bsoncxx::builder::basic;
 
 namespace Database
 {
-	inline mongocxx::client Connection;
-	inline mongocxx::database Db;
-	inline mongocxx::collection Users;
+	extern mongocxx::client Connection;
+	extern mongocxx::database Db;
+	extern mongocxx::collection Users;
 
 	mongocxx::client Connect();
 	mongocxx::database GetDatabase(const std::string_view& DatabaseName);
 	mongocxx::collection GetCollection(const mongocxx::database& Database, const std::string_view& CollectionName);
+	template<typename T>
+	void SetFieldValue(mongocxx::collection& Collection, const bsoncxx::v_noabi::document::view& Document, const std::string_view& FieldName, T NewFieldValue)
+	{
+		Collection.update_one(Document, make_document(kvp("$set", make_document(kvp(FieldName, NewFieldValue)))));
+	}
 	bool VerifyLogin(const std::string& Username, const std::string& Password);
 }
