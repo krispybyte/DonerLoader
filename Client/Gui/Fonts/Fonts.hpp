@@ -19,7 +19,7 @@ namespace Fonts
 		FontConfiguration.FontDataOwnedByAtlas = false;
 
 		// Add all fonts
-		if (!SegoeUi) SegoeUi = Fonts->AddFontFromMemoryTTF(&Fonts::Memory::SegoeUi, sizeof(Fonts::Memory::SegoeUi), 17.5f, &FontConfiguration);
+		if (!SegoeUi) SegoeUi = Fonts->AddFontFromMemoryTTF(&Fonts::Memory::SegoeUi, sizeof(Fonts::Memory::SegoeUi), 19.f, &FontConfiguration);
 
 		return SegoeUi;
 	}
