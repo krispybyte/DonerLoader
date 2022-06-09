@@ -19,13 +19,13 @@ asio::awaitable<void> Network::SocketHandler(tcp::socket TcpSocket)
 
 	if (std::find(ConnectionList.begin(), ConnectionList.end(), IpAddress) != ConnectionList.end())
 	{
-		std::cout << "[-] " << IpAddress.to_string().c_str() << " is already connected!" << '\n';
+		std::cout << "[" << Socket.GetIpAddress().to_string().c_str() << "] Is already connected." << '\n';
 		co_return;
 	}
 
 	ConnectionList.push_back(IpAddress);
 
-	std::cout << "[+] " << IpAddress.to_string().c_str() << " has connected." << '\n';
+	std::cout << "[" << Socket.GetIpAddress().to_string().c_str() << "] Has connected." << '\n';
 
 	std::array<char, NETWORK_CHUNK_SIZE> ReadBufferData;
 	const asio::mutable_buffer ReadBuffer(ReadBufferData.data(), ReadBufferData.size());
@@ -34,7 +34,7 @@ asio::awaitable<void> Network::SocketHandler(tcp::socket TcpSocket)
 	{
 		if (!Socket.Get().is_open())
 		{
-			std::cout << "[-] " << IpAddress.to_string().c_str() << " has disconnected." << '\n';
+			std::cout << "[" << Socket.GetIpAddress().to_string().c_str() << "] Has disconnected." << '\n';
 			break;
 		}
 
@@ -76,7 +76,14 @@ asio::awaitable<void> Network::SocketHandler(tcp::socket TcpSocket)
 		}
 		catch (std::exception& Ex)
 		{
-			std::cerr << "[" << IpAddress.to_string().c_str() << "] Exception: " << Ex.what() << '\n';
+			if (!Socket.HasLoggedIn)
+			{
+				std::cerr << "[" << IpAddress.to_string().c_str() << "] Exception: " << Ex.what() << '\n';
+			}
+			else
+			{
+				std::cerr << "[" << Socket.Username << "] Exception: " << Ex.what() << '\n';
+			}
 			break;
 		}
 	}

@@ -35,6 +35,7 @@ namespace Network
 
 		bool HasLoggedIn = false;
 		int LoginAttempts = 0;
+		std::string Username;
 
 		bool WrongHwid = false;
 

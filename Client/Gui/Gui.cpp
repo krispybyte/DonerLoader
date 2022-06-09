@@ -212,7 +212,7 @@ long __stdcall WindowProcess(HWND window, UINT message, WPARAM WParam, LPARAM LP
 
 				if (Gui::Position.x >= 0 && Gui::Position.x <= Gui::Size.x && Gui::Position.y >= 0 && Gui::Position.y <= 20)
 				{
-					SetWindowPos(Gui::Hwnd, HWND_TOPMOST, Rect.left, Rect.top, 0, 0, SWP_SHOWWINDOW | SWP_NOSIZE | SWP_NOZORDER);
+					SetWindowPos(Gui::Hwnd, 0, Rect.left, Rect.top, 0, 0, SWP_SHOWWINDOW | SWP_NOSIZE | SWP_NOZORDER);
 				}
 			}
 
@@ -230,7 +230,7 @@ void Gui::CreateWnd(const char* WindowName)
 
 	RegisterClassExA(&Class);
 
-	Hwnd = CreateWindowExA(WS_EX_TOPMOST, "ClientWnd", WindowName, WS_POPUP, Position.x, Position.y, Size.x, Size.y, 0, 0, Class.hInstance, 0);
+	Hwnd = CreateWindowExA(0, "ClientWnd", WindowName, WS_POPUP, Position.x, Position.y, Size.x, Size.y, 0, 0, Class.hInstance, 0);
 
 	ShowWindow(Hwnd, SW_SHOWDEFAULT);
 	UpdateWindow(Hwnd);

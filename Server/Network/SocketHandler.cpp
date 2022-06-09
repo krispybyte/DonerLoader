@@ -29,7 +29,7 @@ asio::awaitable<void> Network::Handle::Initialize(Network::Socket& Socket, const
 {
 	if (Socket.HasInitialized)
 	{
-		std::cout << "[!] User has already initialized!" << '\n';
+		std::cout << "[" << Socket.GetIpAddress().to_string().c_str() << "] Has already initialized." << '\n';
 		Socket.Get().close();
 		co_return;
 	}
@@ -68,7 +68,7 @@ asio::awaitable<void> Network::Handle::Initialize(Network::Socket& Socket, const
 
 		if (WriteData.size() > NETWORK_CHUNK_SIZE)
 		{
-			std::cout << "[!] Prepared too large of a socket buffer! Terminating client connection." << '\n';
+			std::cout << "[" << Socket.GetIpAddress().to_string().c_str() << "] Prepared too large of a socket buffer! Terminating client connection." << '\n';
 			Socket.Get().close();
 			co_return;
 		}
@@ -78,14 +78,14 @@ asio::awaitable<void> Network::Handle::Initialize(Network::Socket& Socket, const
 
 	// Verify keys have exchanged for this connection
 	Socket.HasInitialized = true;
-	std::cout << "[+] Exchanged keys." << '\n';
+	std::cout << "[" << Socket.GetIpAddress().to_string().c_str() << "] Has exchanged keys." << '\n';
 }
 
 asio::awaitable<void> Network::Handle::Login(Network::Socket& Socket, const json& ReadJson)
 {
 	if (!Socket.HasInitialized)
 	{
-		std::cout << "[!] User hasn't initialized before trying to log in!" << '\n';
+		std::cout << "[" << Socket.GetIpAddress().to_string().c_str() << "] Hasn't initialized before trying to log in." << '\n';
 		Socket.Get().close();
 		co_return;
 	}
@@ -112,10 +112,16 @@ asio::awaitable<void> Network::Handle::Login(Network::Socket& Socket, const json
 			{
 				// Verify user has logged in
 				Socket.HasLoggedIn = true;
+				// Set the users name
+				Socket.Username = DecryptedUsername;
+
+				std::cout << "[" << Socket.Username << "] Has logged in." << '\n';
 				break;
 			}
 			case LoginStatusIds::WrongCredentials:
 			{
+				std::cout << "[" << Socket.GetIpAddress().to_string().c_str() << "] Wrong login credentials." << '\n';
+
 				Socket.LoginAttempts++;
 
 				if (Socket.LoginAttempts == 4)
@@ -127,11 +133,14 @@ asio::awaitable<void> Network::Handle::Login(Network::Socket& Socket, const json
 			}
 			case LoginStatusIds::WrongHwid:
 			{
+				std::cout << "[" << Socket.GetIpAddress().to_string().c_str() << "] HWID Mismatch." << '\n';
+
 				Socket.WrongHwid = true;
 				break;
 			}
 			default:
 			{
+				std::cout << "[" << Socket.GetIpAddress().to_string().c_str() << "] CRITICAL: Unknown login status id." << '\n';
 				Socket.Get().close();
 				co_return;
 			}
@@ -146,7 +155,7 @@ asio::awaitable<void> Network::Handle::Login(Network::Socket& Socket, const json
 
 		if (WriteData.size() > NETWORK_CHUNK_SIZE)
 		{
-			std::cout << "[!] Prepared too large of a socket buffer! Terminating client connection." << '\n';
+			std::cout << "[" << Socket.Username << "] Prepared too large of a socket buffer!Terminating client connection." << '\n';
 			Socket.Get().close();
 			co_return;
 		}
@@ -159,7 +168,7 @@ asio::awaitable<void> Network::Handle::Module(Network::Socket& Socket, const jso
 {
 	if (!Socket.HasLoggedIn)
 	{
-		std::cout << "[!] User hasn't logged in before trying to stream the module!" << '\n';
+		std::cout << "[" << Socket.Username << "] Hasn't logged in before trying to stream the module." << '\n';
 		Socket.Get().close();
 		co_return;
 	}
@@ -170,7 +179,7 @@ asio::awaitable<void> Network::Handle::Module(Network::Socket& Socket, const jso
 	// Validate module id
 	if (ModuleId < ModuleIds::Test8MB || ModuleId > ModuleIds::Test1KB)
 	{
-		std::cout << "[!] Invalid module id received!" << '\n';
+		std::cout << "[" << Socket.Username << "] Sent an invalid module id." << '\n';
 		Socket.Get().close();
 		co_return;
 	}
@@ -179,7 +188,7 @@ asio::awaitable<void> Network::Handle::Module(Network::Socket& Socket, const jso
 	// the same module for the second time
 	if (std::find(Socket.ModuleIdLoadList.begin(), Socket.ModuleIdLoadList.end(), ModuleId) != Socket.ModuleIdLoadList.end())
 	{
-		std::cout << "[!] User already loaded this module!" << '\n';
+		std::cout << "[" << Socket.Username << "] Has already loaded this module." << '\n';
 		Socket.Get().close();
 		co_return;
 	}
@@ -210,7 +219,7 @@ asio::awaitable<void> Network::Handle::Module(Network::Socket& Socket, const jso
 
 		if (WriteData.size() > NETWORK_CHUNK_SIZE)
 		{
-			std::cout << "[!] Prepared too large of a socket buffer! Terminating client connection." << '\n';
+			std::cout << "[" << Socket.Username << "] Prepared too large of a socket buffer!Terminating client connection." << '\n';
 			Socket.Get().close();
 			co_return;
 		}
@@ -229,14 +238,12 @@ asio::awaitable<void> Network::Handle::Module(Network::Socket& Socket, const jso
 			{
 				Socket.ModuleIdLoadList.push_back(static_cast<Network::ModuleIds>(ModuleId));
 
-				std::cout << '\n' << "[!] Module has successfully streamed!" << '\n';
-				std::cout		  << "[!] This user has streamed " << Socket.ModuleIdLoadList.size() << " module(s) so far!" << '\n';
-				std::cout		  << "[!] Modules streamed by this user so far (by ID):" << '\n';
-
+				std::cout << "[" << Socket.Username << "] Modules streamed (by id): ";
 				for (const int Id : Socket.ModuleIdLoadList)
 				{
-					std::cout << "[+] Module #" << Id << '\n';
+					std::cout << "#" << Id << ' ';
 				}
+				std::cout << '\n';
 
 				// Verify user has streamed the module
 				Socket.HasStreamedModule = true;

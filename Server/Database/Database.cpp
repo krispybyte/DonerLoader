@@ -35,45 +35,52 @@ Network::LoginStatusIds Database::VerifyLogin(const std::string& Username, const
 	// Iterate the users collection
 	for (const auto& Document : UsersCursor)
 	{
-		// Parse the document into a json object
-		const json Json = json::parse(bsoncxx::to_json(Document));
-
-		// Get the username
-		const std::string DbUsername = static_cast<std::string>(Json["username"]);
-
-		if (DbUsername != Username)
+		try
 		{
-			continue;
-		}
+			// Parse the document into a json object
+			const json Json = json::parse(bsoncxx::to_json(Document));
 
-		// Get the password
-		const std::string DbPassword = static_cast<std::string>(Json["password"]);
+			// Get the username
+			const std::string DbUsername = static_cast<std::string>(Json["username"]);
 
-		if (DbPassword != Password)
-		{
-			return Network::LoginStatusIds::WrongCredentials;
-		}
+			if (DbUsername != Username)
+			{
+				continue;
+			}
 
-		// Get the hwid
-		const std::string DbHwid = static_cast<std::string>(Json["hwid"]);
+			// Get the password
+			const std::string DbPassword = static_cast<std::string>(Json["password"]);
 
-		// Set the hwid if it's not set in the db
-		if (DbHwid.empty())
-		{
-			SetFieldValue<std::string>(Users, Document, "hwid", Hwid.dump());
+			if (DbPassword != Password)
+			{
+				return Network::LoginStatusIds::WrongCredentials;
+			}
+
+			// Get the hwid
+			const std::string DbHwid = static_cast<std::string>(Json["hwid"]);
+
+			// Set the hwid if it's not set in the db
+			if (DbHwid.empty())
+			{
+				SetFieldValue<std::string>(Users, Document, "hwid", Hwid.dump());
+				return Network::LoginStatusIds::Success;
+			}
+
+			// Get the hwid as a json
+			const json DbHwidJson = json::parse(DbHwid);
+
+			// If the hwid is set in the db we will check for mismatches
+			if (DbHwidJson != Hwid)
+			{
+				return Network::LoginStatusIds::WrongHwid;
+			}
+
 			return Network::LoginStatusIds::Success;
 		}
-
-		// Get the hwid as a json
-		const json DbHwidJson = json::parse(DbHwid);
-		
-		// If the hwid is set in the db we will check for mismatches
-		if (DbHwidJson != Hwid)
+		catch (std::exception& Ex)
 		{
-			return Network::LoginStatusIds::WrongHwid;
+			std::cerr << "[" << Username << "] Exception:" << Ex.what() << '\n';
 		}
-
-		return Network::LoginStatusIds::Success;
 	}
 
 	return Network::LoginStatusIds::WrongCredentials;
