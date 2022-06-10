@@ -1,6 +1,5 @@
 #include "Network.hpp"
 #include "SocketHandler.hpp"
-#include <ThemidaSDK.h>
 
 namespace Network
 {
@@ -17,7 +16,6 @@ asio::awaitable<void> Network::SocketHandler(tcp::socket Socket)
 {
 	Client::HasConnected = true;
 
-	STR_ENCRYPT_START
 	std::cout << "[+] Connected." << '\n';
 
 	while (true)
@@ -74,22 +72,17 @@ asio::awaitable<void> Network::SocketHandler(tcp::socket Socket)
 			break;
 		}
 	}
-	STR_ENCRYPT_END
 }
 
 asio::awaitable<void> Network::Connect()
 {
-	STR_ENCRYPT_START
 	std::cout << "[!] Spawning launch coroutine." << '\n';
-	STR_ENCRYPT_END
 
 	const asio::system_executor Executor = asio::get_associated_executor(asio::use_awaitable);
 	tcp::socket Socket = tcp::socket(Executor);
 	tcp::resolver Resolver = tcp::resolver(Executor);
 
-	STR_ENCRYPT_START
 	const tcp::resolver::query Query = tcp::resolver::query(NETWORK_IP_AND_PORT_STR);
-	STR_ENCRYPT_END
 
 	const tcp::resolver::iterator Endpoint = tcp::resolver::iterator{ co_await Resolver.async_resolve(Query, asio::use_awaitable) };
 

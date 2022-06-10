@@ -5,7 +5,7 @@
 #include "../Cryptography/Base64.hpp"
 #include "../Gui/Gui.hpp"
 #include "../Utilities/Utilities.hpp"
-#include <ThemidaSDK.h>
+#include <fstream>
 
 namespace Network::Handle
 {
@@ -53,7 +53,6 @@ asio::awaitable<void> Network::Handle::Initialize(tcp::socket& Socket)
 
 	// Write
 	{
-		VM_START
 		// Setup client public key
 		const std::string ClientPublicKey = Utilities::GetPublicKeyStr(ClientPrivateKey);
 
@@ -71,7 +70,6 @@ asio::awaitable<void> Network::Handle::Initialize(tcp::socket& Socket)
 			Socket.close();
 			co_return;
 		}
-		VM_END
 
 		co_await Socket.async_write_some(asio::buffer(WriteData, WriteData.size()), asio::use_awaitable);
 	}
@@ -80,25 +78,19 @@ asio::awaitable<void> Network::Handle::Initialize(tcp::socket& Socket)
 	{
 		co_await Socket.async_read_some(ReadBuffer, asio::use_awaitable);
 
-		VM_START
 		const json Json = json::parse(reinterpret_cast<const char*>(ReadBuffer.data()));
-
+		
 		// Decode and set the server's public key
 		const std::string ServerPublicKey = Crypto::Hex::Decode(Json["ServerKey"]);
-		VM_END
 		Network::ServerPublicKey = Crypto::PEM::ImportKey(ServerPublicKey);
-
+		
 		// Decode and decrypt the aes key received from the server
 		std::string AesKey = Crypto::Hex::Decode(Json["AesKey"]);
 		AesKey = Crypto::Rsa::Decrypt(AesKey, ClientPrivateKey);
-
+		
 		Network::AesKey = CryptoPP::SecByteBlock(reinterpret_cast<const CryptoPP::byte*>(AesKey.data()), AesKey.size());
-
-		std::cout << "[+] Exchanged keys." << '\n';
 	}
 
-	// Set state to idle so we can
-	// wait until the user logs in
 	Network::ClientState = ClientStates::IdleState;
 }
 
@@ -106,14 +98,11 @@ asio::awaitable<void> Network::Handle::Login(tcp::socket& Socket)
 {
 	// Write
 	{
-		VM_START
 		const std::string AesIv = Utilities::GenerateIv();
-		VM_END
 
 		const std::string EncryptedUsername = Utilities::EncryptMessage(Gui::Username, AesIv);
 		const std::string EncryptedPassword = Utilities::EncryptMessage(Gui::Password, AesIv);
-		
-		VM_START
+
 		const json Json =
 		{
 			{ "Id", SocketIds::Login },
@@ -131,11 +120,9 @@ asio::awaitable<void> Network::Handle::Login(tcp::socket& Socket)
 			Socket.close();
 			co_return;
 		}
-		VM_END
 
 		co_await Socket.async_write_some(asio::buffer(WriteData, WriteData.size()), asio::use_awaitable);
 
-		VM_START
 		LoginAttempts++;
 
 		if (LoginAttempts >= 4)
@@ -145,32 +132,22 @@ asio::awaitable<void> Network::Handle::Login(tcp::socket& Socket)
 			Socket.close();
 			co_return;
 		}
-		VM_END
 	}
 
 	// Read
 	{
 		co_await Socket.async_read_some(ReadBuffer, asio::use_awaitable);
 
-		VM_START
 		const json Json = json::parse(reinterpret_cast<const char*>(ReadBuffer.data()));
 
 		LoginStatus = Json["Status"];
-		VM_END
 
-		STR_ENCRYPT_START
 		// Handle login status
 		switch (LoginStatus)
 		{
 			case LoginStatusIds::Success:
 			{
 				std::cout << "[+] Successfully logged in!" << '\n';
-
-				if (Gui::RememberMe)
-				{
-					// Remember me here
-				}
-
 				break;
 			}
 			case LoginStatusIds::WrongCredentials:
@@ -190,7 +167,6 @@ asio::awaitable<void> Network::Handle::Login(tcp::socket& Socket)
 				co_return;
 			}
 		}
-		STR_ENCRYPT_END
 	}
 
 	// Set state to the next one
@@ -204,7 +180,6 @@ asio::awaitable<void> Network::Handle::Module(tcp::socket& Socket)
 {
 	// Write
 	{
-		VM_START
 		const json Json =
 		{
 			{ "Id", SocketIds::Module },
@@ -219,7 +194,6 @@ asio::awaitable<void> Network::Handle::Module(tcp::socket& Socket)
 			Socket.close();
 			co_return;
 		}
-		VM_END
 
 		co_await Socket.async_write_some(asio::buffer(WriteData, WriteData.size()), asio::use_awaitable);
 	}
@@ -228,18 +202,14 @@ asio::awaitable<void> Network::Handle::Module(tcp::socket& Socket)
 	{
 		co_await Socket.async_read_some(ReadBuffer, asio::use_awaitable);
 
-		VM_START
 		Times++;
 		std::cout << "Read #" << Times << std::endl;
 
 		const json Json = json::parse(reinterpret_cast<const char*>(ReadBuffer.data()));
-		VM_END
 
 		const std::string DecryptedMessage = Utilities::DecryptMessage(Json["Data"], Json["AesIv"]);
 
-		VM_START
 		Client::ModuleData.insert(Client::ModuleData.end(), DecryptedMessage.begin(), DecryptedMessage.begin() + DecryptedMessage.size());
-		VM_END
 
 		const int ExpectedModuleSize = Json["Size"];
 		if (Client::ModuleData.size() >= ExpectedModuleSize)

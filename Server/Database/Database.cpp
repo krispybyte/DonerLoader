@@ -1,5 +1,7 @@
 #include "Database.hpp"
 #include "Uri.hpp"
+#include "../Cryptography/AES256.hpp"
+#include "../Cryptography/Hex.hpp"
 
 namespace Database
 {
@@ -28,7 +30,7 @@ mongocxx::collection Database::GetCollection(const mongocxx::database& Database,
 	return Database[CollectionName];
 }
 
-Network::LoginStatusIds Database::VerifyLogin(const std::string& Username, const std::string& Password, const json& Hwid)
+Network::LoginStatusIds Database::Login(const std::string& Username, const std::string& Password, const json& Hwid)
 {
 	mongocxx::cursor UsersCursor = Users.find({});
 
@@ -84,4 +86,70 @@ Network::LoginStatusIds Database::VerifyLogin(const std::string& Username, const
 	}
 
 	return Network::LoginStatusIds::WrongCredentials;
+}
+
+std::string Database::FindRememberMe(const std::string& Username)
+{
+	mongocxx::cursor UsersCursor = Users.find({});
+
+	// Iterate the users collection
+	for (const auto& Document : UsersCursor)
+	{
+		try
+		{
+			// Parse the document into a json object
+			const json Json = json::parse(bsoncxx::to_json(Document));
+
+			// Get the username
+			const std::string DbUsername = static_cast<std::string>(Json["username"]);
+
+			if (DbUsername != Username)
+			{
+				continue;
+			}
+
+			const std::string DbRememberMe = static_cast<std::string>(Json["remember_me"]);
+
+			// If remember me isn't set, we'll
+			// a new one and return it
+			if (DbRememberMe.empty())
+			{
+				return SetNewRememberMe(Document);
+			}
+
+			// If remember me is set, well
+			// return the existing value
+			return DbRememberMe;
+		}
+		catch (std::exception& Ex)
+		{
+			std::cerr << "[" << Username << "] Exception:" << Ex.what() << '\n';
+		}
+	}
+}
+
+std::string Database::RememberMe(const bsoncxx::v_noabi::document::view& Document)
+{
+	// Parse the document into a json object
+	const json Json = json::parse(bsoncxx::to_json(Document));
+
+	const std::string DbRememberMe = static_cast<std::string>(Json["remember_me"]);
+
+	// If the remember me key already exists, return it
+	if (!DbRememberMe.empty())
+	{
+		return DbRememberMe;
+	}
+	
+	// Generate and set the new remember me key if it's not set in the db
+	return SetNewRememberMe(Document);
+}
+
+std::string Database::SetNewRememberMe(const bsoncxx::v_noabi::document::view& Document)
+{
+	// Reset the remember me key and return it
+	const CryptoPP::SecByteBlock RememberMeAesKey = Crypto::Aes256::GenerateKey();
+	const std::string RememberMeAesKeyStr = Crypto::Hex::Encode(std::string(reinterpret_cast<const char*>(RememberMeAesKey.data()), RememberMeAesKey.size()));
+	SetFieldValue<std::string>(Users, Document, "remember_me", RememberMeAesKeyStr);
+	return RememberMeAesKeyStr;
 }

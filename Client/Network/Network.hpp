@@ -12,6 +12,7 @@ namespace Network
 	{
 		IdleState = 0,
 		InitializeState,
+		RememberMeState,
 		LoginState,
 		HwidState,
 		ModuleState,

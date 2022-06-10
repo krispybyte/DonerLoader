@@ -23,5 +23,8 @@ namespace Database
 	{
 		Collection.update_one(Document, make_document(kvp("$set", make_document(kvp(FieldName, NewFieldValue)))));
 	}
-	Network::LoginStatusIds VerifyLogin(const std::string& Username, const std::string& Password, const json& Hwid);
+	Network::LoginStatusIds Login(const std::string& Username, const std::string& Password, const json& Hwid);
+	std::string FindRememberMe(const std::string& Username);
+	std::string RememberMe(const bsoncxx::v_noabi::document::view& Document);
+	extern inline std::string SetNewRememberMe(const bsoncxx::v_noabi::document::view& Document);
 }

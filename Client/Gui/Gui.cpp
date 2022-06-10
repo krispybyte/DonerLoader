@@ -2,7 +2,6 @@
 #include "Fonts/Fonts.hpp"
 #include <backends/imgui_impl_win32.h>
 #include <backends/imgui_impl_dx9.h>
-#include <ThemidaSDK.h>
 #include "../Network/SocketHandler.hpp"
 
 namespace Gui
@@ -225,7 +224,6 @@ long __stdcall WindowProcess(HWND window, UINT message, WPARAM WParam, LPARAM LP
 
 void Gui::CreateWnd(const char* WindowName)
 {
-	MUTATE_START
 	Class = { sizeof(WNDCLASSEX), CS_CLASSDC, reinterpret_cast<WNDPROC>(WindowProcess), 0, 0, GetModuleHandleA(0), 0, 0, 0, 0, "ClientWnd", 0 };
 
 	RegisterClassExA(&Class);
@@ -234,7 +232,6 @@ void Gui::CreateWnd(const char* WindowName)
 
 	ShowWindow(Hwnd, SW_SHOWDEFAULT);
 	UpdateWindow(Hwnd);
-	MUTATE_END
 }
 
 void Gui::ClearWnd()

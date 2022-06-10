@@ -1,11 +1,9 @@
 #include "Common.hpp"
 #include "Network/SocketHandler.hpp"
 #include "Gui/Gui.hpp"
-#include <ThemidaSDK.h>
 
 int main()
 {
-	MUTATE_START
 	SetConsoleTitleA("Client");
 	
 	std::thread([&]
@@ -24,7 +22,6 @@ int main()
 			ExitProcess(14);
 		}
 	}).detach();
-	MUTATE_END
 	
 	Gui::Run();
 	

@@ -9,7 +9,7 @@ asio::awaitable<void> Network::Handle::Idle(Network::Socket& Socket)
 	{
 		const json Json =
 		{
-			{ "Null", NULL }
+			{ "Null", 0 }
 		};
 
 		const std::string WriteData = Json.dump() + '\0';
@@ -29,7 +29,6 @@ asio::awaitable<void> Network::Handle::Initialize(Network::Socket& Socket, const
 {
 	if (Socket.HasInitialized)
 	{
-		std::cout << "[" << Socket.GetIpAddress().to_string().c_str() << "] Has already initialized." << '\n';
 		Socket.Get().close();
 		co_return;
 	}
@@ -103,7 +102,12 @@ asio::awaitable<void> Network::Handle::Login(Network::Socket& Socket, const json
 
 	// Write
 	{
-		const LoginStatusIds LoginStatusId = Database::VerifyLogin(DecryptedUsername, DecryptedPassword, Hwid);
+		const LoginStatusIds LoginStatusId = Database::Login(DecryptedUsername, DecryptedPassword, Hwid);
+
+		json Json =
+		{
+			{ "Status", LoginStatusId }
+		};
 
 		// Handle login status
 		switch (LoginStatusId)
@@ -112,6 +116,7 @@ asio::awaitable<void> Network::Handle::Login(Network::Socket& Socket, const json
 			{
 				// Verify user has logged in
 				Socket.HasLoggedIn = true;
+
 				// Set the users name
 				Socket.Username = DecryptedUsername;
 
@@ -145,11 +150,6 @@ asio::awaitable<void> Network::Handle::Login(Network::Socket& Socket, const json
 				co_return;
 			}
 		}
-
-		const json Json =
-		{
-			{ "Status", LoginStatusId }
-		};
 
 		const std::string WriteData = Json.dump() + '\0';
 

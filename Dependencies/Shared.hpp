@@ -33,6 +33,7 @@ namespace Network
 {
 #define NETWORK_CHUNK_SIZE			200000					// 200 Kilobytes 
 #define NETWORK_PORT_INT			42069
+//#define NETWORK_IP_AND_PORT_STR		"155.254.213.139", "42069"
 #define NETWORK_IP_AND_PORT_STR		"127.0.0.1", "42069"
 
 	enum class SocketIds : int
@@ -40,7 +41,6 @@ namespace Network
 		Idle = 1104,
 		Initialize = 2485,
 		Login = 8922,
-		Hwid = 9014,
 		Module = 1482
 	};
 
@@ -48,5 +48,12 @@ namespace Network
 	{
 		Test8MB = 0,
 		Test1KB = 1
+	};
+
+	enum class LoginStatusIds : int
+	{
+		Success = 8925,
+		WrongCredentials = 1000,
+		WrongHwid = 2000
 	};
 }
