@@ -2,9 +2,6 @@
 `Apollo` is a project made for software securing and managing, The loader includes asynchronous client and server communication made with Boost's TCP library, [Asio](https://github.com/chriskohlhoff/asio "Asio on github").
 The `Apollo` loader project is written in `C++20` due to the ease of development when building an asynchronous application using the new [co routines](https://en.cppreference.com/w/cpp/language/coroutines "cppreference").
 
-# Apollo panel
-`Apollo` includes a user interface panel, visit it's development [here](https://github.com/sariaki/Apollo-Panel "Apollo-Panel on github").
-
 # Task-list
 - [x] RSA & AES256 Key exchange
 - [x] Module streaming
