@@ -9,16 +9,12 @@ The `Apollo` loader project is written in `C++20` due to the ease of development
 - [x] GUI (using [ImGui](https://github.com/ocornut/imgui "ImGui on github"))
 - [x] Login
 - [x] Hardware ID locking
-- [ ] Computer username to hardware id
 - [ ] Log files for the client and server
 - [ ] Version checking and updating
-- [ ] Remember Me file (encrypted with a different key per user)
+- [ ] Remember Me
 - [ ] Create a static library for cryptography wrappers
-- [ ] Hash json key values
 - [ ] Heartbeat
 - [ ] Module injection
-- [ ] Module relocations and imports handled over the server
-- [ ] Client pre-loader
 
 # Setup
 ### Cloning Apollo
