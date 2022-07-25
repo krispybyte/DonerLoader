@@ -5,4 +5,4 @@
  	your own mongo database URI.
 */
 
-#define DATABASE_URI "mongodb+srv://balls:nYHoQGPEIDUfG2JJ@cluster0.bwtso.mongodb.net/?retryWrites=true&w=majority"
+#define DATABASE_URI "mongodb://localhost:27017"
