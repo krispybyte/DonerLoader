@@ -6,7 +6,7 @@ This project was initially made for learning purposes and making a simple cheat 
 A lot of the features are not finished and I will most likely not be updating it any time soon, but I hope someone is able to learn from it or possibly improve it as pull requests are welcome.
 
 # Links
-- [Doner's UnknownCheats post](https://www.unknowncheats.me/forum/general-programming-and-reversing/508025-ner-cheat-loader.html#post3483634)
+- [Doner's UnknownCheats post](https://www.unknowncheats.me/forum/general-programming-and-reversing/508025-ner-cheat-loader.html)
 
 # Task-list
 - [x] RSA & AES256 Key exchange
