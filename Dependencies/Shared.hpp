@@ -1,5 +1,6 @@
 /*
-	APOLLO
+	It's le DonerLoader
+	https://github.com/krispybyte/Doner
 */
 
 #pragma once
@@ -31,7 +32,7 @@ using namespace nlohmann;
 
 namespace Network
 {
-#define NETWORK_CHUNK_SIZE			200000					// 200 Kilobytes 
+#define NETWORK_CHUNK_SIZE			200000					// 200 KB 
 #define NETWORK_PORT_INT			42069
 #define NETWORK_IP_AND_PORT_STR		"127.0.0.1", "42069"
 

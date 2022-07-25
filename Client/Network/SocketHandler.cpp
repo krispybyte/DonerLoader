@@ -173,6 +173,7 @@ asio::awaitable<void> Network::Handle::Login(tcp::socket& Socket)
 	Network::ClientState = ClientStates::IdleState;
 }
 
+// Testing purposes...
 int Times = 0;
 constexpr int ModuleId = Network::ModuleIds::Test8MB;
 
@@ -183,7 +184,7 @@ asio::awaitable<void> Network::Handle::Module(tcp::socket& Socket)
 		const json Json =
 		{
 			{ "Id", SocketIds::Module },
-			{ "ModuleId", Network::ModuleIds::Test8MB }
+			{ "ModuleId", ModuleId }
 		};
 
 		const std::string WriteData = Json.dump() + '\0';

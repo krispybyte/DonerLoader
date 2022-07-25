@@ -1,6 +1,9 @@
 # Information
-`Apollo` is a project made for software securing and managing, The loader includes asynchronous client and server communication made with Boost's TCP library, [Asio](https://github.com/chriskohlhoff/asio "Asio on github").
-The `Apollo` loader project is written in `C++20` due to the ease of development when building an asynchronous application using the new [co routines](https://en.cppreference.com/w/cpp/language/coroutines "cppreference").
+`Döner` is a project made for software securing and managing, The loader includes asynchronous client and server communication made with Boost's TCP library, [Asio](https://github.com/chriskohlhoff/asio "Asio on github").
+The `Döner` loader project is written in `C++20` due to the ease of development when building an asynchronous application using the new [co routines](https://en.cppreference.com/w/cpp/language/coroutines "cppreference").
+
+This project was initially made for learning purposes and making a simple loader, looking back a lot of the code could be better, but this source should allow anyone to be able write a simple loader by using it as a reference.
+A lot of the features are not done and I will most likely not be updating it any time soon, but I hope someone is able to learn from it or possibly improve it as pull requests are welcome.
 
 # Task-list
 - [x] RSA & AES256 Key exchange
@@ -13,18 +16,18 @@ The `Apollo` loader project is written in `C++20` due to the ease of development
 - [ ] Log files for the client and server
 - [ ] Version checking and updating
 - [ ] Remember Me
-- [ ] Create a static library for cryptography wrappers
+- [ ] Create a static library for the cryptography wrapper
 - [ ] Heartbeat
 - [ ] Module injection
 - [ ] Client pre-loader
 
 # Setup
-### Cloning Apollo
+### Cloning Döner
 ```
-git clone --recursive https://github.com/krispybyte/Apollo.git
+git clone --recursive https://github.com/krispybyte/Doner.git
 ```
 
-### Compiling dependencies used by Apollo
+### Compiling dependencies used by Döner
 <details><summary>CryptoPP library compilation</summary><br/>
 1.  cd to the Dependencies/cryptopp directory.<br>
 2.  git clone https://github.com/noloader/cryptopp-pem.git.<br>
@@ -34,10 +37,10 @@ git clone --recursive https://github.com/krispybyte/Apollo.git
 
 <details><summary>MongoDb CXX library compilation</summary><br/>
 1.  cd over to the Dependencies/mongo-c-driver directory.<br>
-2.  cmake -G "Visual Studio 16 2019" -DCMAKE_CXX_STANDARD=20 -DCMAKE_CXX_FLAGS="/Zc:__cplusplus" -DCMAKE_PREFIX_PATH=D:\Apollo\Dependencies\mongo-c-driver -DCMAKE_INSTALL_PREFIX=D:\Apollo\Dependencies-mongo-cxx-driver<br>
+2.  cmake -G "Visual Studio 16 2019" -DCMAKE_CXX_STANDARD=20 -DCMAKE_CXX_FLAGS="/Zc:__cplusplus" -DCMAKE_PREFIX_PATH=D:\Doner\Dependencies\mongo-c-driver -DCMAKE_INSTALL_PREFIX=D:\Doner\Dependencies-mongo-cxx-driver<br>
 3.  Launch mongo-c-driver.sln, make sure the architecture is set to x64.<br>
 4.  Compile the needed projects now, or all of them.<br>
-5.  Launch CMake GUI, The source code path will be the directory of your mongo-cxx-driver, for example: D:\Apollo\Dependencies\mongo-cxx-driver.<br>
+5.  Launch CMake GUI, The source code path will be the directory of your mongo-cxx-driver, for example: D:\Doner\Dependencies\mongo-cxx-driver.<br>
 6.  Press 'configure', set the generator and press finish.<br>
 7.  You should get an error, make sure to turn BSONCXX_POLY_USE_STD on.<br>
 8.  Make sure the 'Advanced' checkbox is turned on, scroll down to the bottom, you should see that bson-1.0_DIR and libbson-1.0_DIR are missing, set the libbson directory to the 'mongo-c-driver/src/libbson' directory, and the bson directory to the 'mongo-c-driver/src/libbson/bson', obviously include the full path for both.<br>
@@ -57,3 +60,15 @@ git clone --recursive https://github.com/krispybyte/Apollo.git
 - [MongoDB CXX](https://github.com/mongodb/mongo-cxx-driver "MongoDB CXX on github")
 - [ImGui](https://github.com/ocornut/imgui "ImGui on github")
 - [HardwareId](https://github.com/krispybyte/HardwareId "HardwareId on github")
+
+# Screenshots
+### Login form
+![](./Pictures/login-form.jpg "Login form")
+### Module selection form
+![](./Pictures/module-form.jpg "Module form")
+### Successful stream form
+![](./Pictures/stream-form.jpg "Stream form")
+
+# Crucial Credits
+- [Sariaki](https://github.com/sariaki) for inspiring me to rename the project to Döner, here's his picture which inspired me:
+<img src="Pictures/ze-doner.jpg" width="300" height="300">
