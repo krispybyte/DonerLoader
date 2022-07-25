@@ -132,6 +132,11 @@ asio::awaitable<void> Network::Handle::Login(Network::Socket& Socket, const json
 				if (Socket.LoginAttempts == 4)
 				{
 					Socket.Get().close();
+					const auto IpAddressPosition = std::find(ConnectionList.begin(), ConnectionList.end(), Socket.GetIpAddress());
+					if (IpAddressPosition != ConnectionList.end())
+					{
+						ConnectionList.erase(IpAddressPosition);
+					}
 					co_return;
 				}
 				break;
@@ -155,7 +160,7 @@ asio::awaitable<void> Network::Handle::Login(Network::Socket& Socket, const json
 
 		if (WriteData.size() > NETWORK_CHUNK_SIZE)
 		{
-			std::cout << "[" << Socket.Username << "] Prepared too large of a socket buffer!Terminating client connection." << '\n';
+			std::cout << "[" << Socket.Username << "] Prepared too large of a socket buffer! Terminating client connection." << '\n';
 			Socket.Get().close();
 			co_return;
 		}
