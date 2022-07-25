@@ -5,6 +5,9 @@ The `Döner` loader project is written in `C++20` due to the ease of development
 This project was initially made for learning purposes and making a simple cheat loader, looking back a lot of the code could have been better, but this source should allow anyone to be able write a simple loader by using it as a reference.
 A lot of the features are not finished and I will most likely not be updating it any time soon, but I hope someone is able to learn from it or possibly improve it as pull requests are welcome.
 
+# Links
+- [Doner's UnknownCheats post](https://www.unknowncheats.me/forum/general-programming-and-reversing/508025-ner-cheat-loader.html#post3483634)
+
 # Task-list
 - [x] RSA & AES256 Key exchange
 - [x] Module streaming
