@@ -24,7 +24,7 @@ A lot of the features are not finished and I will most likely not be updating it
 # Setup
 ### Cloning Döner
 ```
-git clone --recursive https://github.com/krispybyte/Doner.git
+git clone --recursive https://github.com/krispybyte/DonerLoader.git
 ```
 
 ### Compiling dependencies used by Döner
