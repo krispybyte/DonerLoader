@@ -130,26 +130,12 @@ std::string Database::FindRememberMe(const std::string& Username)
 
 std::string Database::RememberMe(const bsoncxx::v_noabi::document::view& Document)
 {
-	// Parse the document into a json object
-	const json Json = json::parse(bsoncxx::to_json(Document));
-
-	const std::string DbRememberMe = static_cast<std::string>(Json["remember_me"]);
-
-	// If the remember me key already exists, return it
-	if (!DbRememberMe.empty())
-	{
-		return DbRememberMe;
-	}
-	
-	// Generate and set the new remember me key if it's not set in the db
-	return SetNewRememberMe(Document);
+	// Unfinished
+	return {};
 }
 
 std::string Database::SetNewRememberMe(const bsoncxx::v_noabi::document::view& Document)
 {
-	// Reset the remember me key and return it
-	const CryptoPP::SecByteBlock RememberMeAesKey = Crypto::Aes256::GenerateKey();
-	const std::string RememberMeAesKeyStr = Crypto::Hex::Encode(std::string(reinterpret_cast<const char*>(RememberMeAesKey.data()), RememberMeAesKey.size()));
-	SetFieldValue<std::string>(Users, Document, "remember_me", RememberMeAesKeyStr);
-	return RememberMeAesKeyStr;
+	// Unfinished
+	return {};
 }
