@@ -1,8 +1,8 @@
 # Information
-`Döner` is a project made for securing your cheat, The cheat loader includes asynchronous client and server communication made with Boost's TCP library, [Asio](https://github.com/chriskohlhoff/asio "Asio on github").
+`Döner` is a project made for securing your program, The loader includes asynchronous client and server communication made with Boost's TCP library, [Asio](https://github.com/chriskohlhoff/asio "Asio on github").
 The `Döner` loader project is written in `C++20` due to the ease of development when building an asynchronous application using the new [co routines](https://en.cppreference.com/w/cpp/language/coroutines "cppreference").
 
-This project was initially made for learning purposes and making a simple cheat loader, looking back a lot of the code could have been better, but this source should allow anyone to be able write a simple loader by using it as a reference.
+This project was initially made for learning purposes and making a simple loader, looking back a lot of the code could have been better, but this source should allow anyone to be able write a simple loader by using it as a reference.
 A lot of the features are not finished and I will most likely not be updating it any time soon, but I hope someone is able to learn from it or possibly improve it as pull requests are welcome.
 
 # Links
